@@ -781,37 +781,140 @@ function OrionLib:MakeWindow(WindowConfig)
 		Minimized = not Minimized    
 	end)
 
+	local LoadingSteps = {}
+	local LoadingPercent = 0
+
+	local function AddLoadingStep(Text)
+		table.insert(LoadingSteps, Text)
+	end
+
 	local function LoadSequence()
-		MainWindow.Visible = false
-		local LoadSequenceLogo = SetProps(MakeElement("Image", WindowConfig.IntroIcon), {
-			Parent = Orion,
-			AnchorPoint = Vector2.new(0.5, 0.5),
-			Position = UDim2.new(0.5, 0, 0.4, 0),
-			Size = UDim2.new(0, 28, 0, 28),
-			ImageColor3 = Color3.fromRGB(255, 255, 255),
-			ImageTransparency = 1
-		})
-
-		local LoadSequenceText = SetProps(MakeElement("Label", WindowConfig.IntroText, 14), {
-			Parent = Orion,
-			Size = UDim2.new(1, 0, 1, 0),
-			AnchorPoint = Vector2.new(0.5, 0.5),
-			Position = UDim2.new(0.5, 19, 0.5, 0),
-			TextXAlignment = Enum.TextXAlignment.Center,
-			Font = Enum.Font.FredokaOne,
-			TextTransparency = 1
-		})
-
-		TweenService:Create(LoadSequenceLogo, TweenInfo.new(.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {ImageTransparency = 0, Position = UDim2.new(0.5, 0, 0.5, 0)}):Play()
-		wait(0.8)
-		TweenService:Create(LoadSequenceLogo, TweenInfo.new(.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Position = UDim2.new(0.5, -(LoadSequenceText.TextBounds.X/2), 0.5, 0)}):Play()
-		wait(0.3)
-		TweenService:Create(LoadSequenceText, TweenInfo.new(.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {TextTransparency = 0}):Play()
-		wait(2)
-		TweenService:Create(LoadSequenceText, TweenInfo.new(.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {TextTransparency = 1}):Play()
 		MainWindow.Visible = true
-		LoadSequenceLogo:Destroy()
-		LoadSequenceText:Destroy()
+
+		-- Overlay sur la fenetre
+		local LoadOverlay = Instance.new("Frame")
+		LoadOverlay.Size = UDim2.new(1, 0, 1, 0)
+		LoadOverlay.Position = UDim2.new(0, 0, 0, 0)
+		LoadOverlay.BackgroundColor3 = Color3.fromRGB(5, 5, 5)
+		LoadOverlay.BackgroundTransparency = 0
+		LoadOverlay.ZIndex = 20
+		LoadOverlay.BorderSizePixel = 0
+		LoadOverlay.Parent = MainWindow
+
+		-- % en haut
+		local PercentLabel = Instance.new("TextLabel")
+		PercentLabel.Size = UDim2.new(1, 0, 0, 30)
+		PercentLabel.Position = UDim2.new(0, 0, 0, 15)
+		PercentLabel.BackgroundTransparency = 1
+		PercentLabel.TextColor3 = Color3.fromRGB(230, 230, 230)
+		PercentLabel.Font = Enum.Font.FredokaOne
+		PercentLabel.TextSize = 22
+		PercentLabel.Text = "0%"
+		PercentLabel.ZIndex = 21
+		PercentLabel.Parent = LoadOverlay
+
+		-- Barre fond
+		local BarBG = Instance.new("Frame")
+		BarBG.Size = UDim2.new(1, -40, 0, 4)
+		BarBG.Position = UDim2.new(0, 20, 0, 52)
+		BarBG.BackgroundColor3 = Color3.fromRGB(38, 38, 38)
+		BarBG.BorderSizePixel = 0
+		BarBG.ZIndex = 21
+		BarBG.Parent = LoadOverlay
+		Instance.new("UICorner", BarBG).CornerRadius = UDim.new(1, 0)
+
+		-- Barre fill
+		local BarFill = Instance.new("Frame")
+		BarFill.Size = UDim2.new(0, 0, 1, 0)
+		BarFill.BackgroundColor3 = Color3.fromRGB(230, 230, 230)
+		BarFill.BorderSizePixel = 0
+		BarFill.ZIndex = 22
+		BarFill.Parent = BarBG
+		Instance.new("UICorner", BarFill).CornerRadius = UDim.new(1, 0)
+
+		-- Log en temps reel
+		local LogLabel = Instance.new("TextLabel")
+		LogLabel.Size = UDim2.new(1, -20, 0, 14)
+		LogLabel.Position = UDim2.new(0, 10, 0, 64)
+		LogLabel.BackgroundTransparency = 1
+		LogLabel.TextColor3 = Color3.fromRGB(100, 100, 100)
+		LogLabel.Font = Enum.Font.FredokaOne
+		LogLabel.TextSize = 12
+		LogLabel.TextXAlignment = Enum.TextXAlignment.Left
+		LogLabel.Text = ""
+		LogLabel.ZIndex = 21
+		LogLabel.Parent = LoadOverlay
+
+		-- Fonction pour mettre a jour la barre + % avec animation lettre par lettre
+		local function UpdateProgress(percent, logText)
+			-- Animer le %
+			task.spawn(function()
+				local current = LoadingPercent
+				local steps = 15
+				for i = 1, steps do
+					local v = current + (percent - current) * (i / steps)
+					PercentLabel.Text = math.floor(v) .. "%"
+					TweenService:Create(BarFill, TweenInfo.new(0.05, Enum.EasingStyle.Linear), {Size = UDim2.new(v/100, 0, 1, 0)}):Play()
+					task.wait(0.03)
+				end
+				PercentLabel.Text = percent .. "%"
+				LoadingPercent = percent
+			end)
+
+			-- Animation lettre par lettre avec glitch
+			task.spawn(function()
+				local chars = {"#","@","!","$","%","&","?","*","/","\\"}
+				local final = logText
+				LogLabel.Text = ""
+				for i = 1, #final do
+					-- Glitch: affiche 2-3 chars aleatoires avant la vraie lettre
+					for g = 1, 2 do
+						LogLabel.Text = string.sub(final, 1, i-1) .. chars[math.random(1, #chars)]
+						task.wait(0.018)
+					end
+					LogLabel.Text = string.sub(final, 1, i)
+					task.wait(0.025)
+				end
+			end)
+		end
+
+		-- Etapes de chargement
+		local steps = {
+			{text = "> Initialisation de l'interface...", percent = 15},
+			{text = "> Chargement des elements...", percent = 35},
+			{text = "> Connexion aux services...", percent = 55},
+			{text = "> Application du theme...", percent = 75},
+			{text = "> Preparation des tabs...", percent = 90},
+			{text = "> Pret !", percent = 100},
+		}
+
+		-- Ajouter les custom steps si y'en a
+		for _, s in next, LoadingSteps do
+			table.insert(steps, math.random(2, #steps), {text = "> " .. s, percent = 0})
+		end
+
+		-- Recalculer les % uniformement
+		for i, s in next, steps do
+			if s.percent == 0 then
+				s.percent = math.floor((i / #steps) * 100)
+			end
+		end
+
+		for _, step in next, steps do
+			UpdateProgress(step.percent, step.text)
+			task.wait(0.55)
+		end
+
+		task.wait(0.3)
+
+		-- Fade out overlay
+		TweenService:Create(LoadOverlay, TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundTransparency = 1}):Play()
+		TweenService:Create(PercentLabel, TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {TextTransparency = 1}):Play()
+		TweenService:Create(LogLabel, TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {TextTransparency = 1}):Play()
+		TweenService:Create(BarBG, TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundTransparency = 1}):Play()
+		TweenService:Create(BarFill, TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundTransparency = 1}):Play()
+		task.wait(0.5)
+		LoadOverlay:Destroy()
 	end 
 
 	if WindowConfig.IntroEnabled then
