@@ -48,6 +48,12 @@ else
 end
 
 
+-- Détruire l'ancien Orion s'il existe déjà
+local OldOrion = (gethui and gethui() or game:GetService("CoreGui")):FindFirstChild("Orion")
+if OldOrion then
+	OldOrion:Destroy()
+end
+
 local Orion = Instance.new("ScreenGui")
 Orion.Name = "Orion"
 if syn then
@@ -500,11 +506,19 @@ function OrionLib:MakeWindow(WindowConfig)
 			Parent = SearchBar
 		}), "Second")
 
-AddThemeObject(SetProps(MakeElement("Frame"), {
-    Size = UDim2.new(0, 1, 1, 0),
-    Position = UDim2.new(1, -1, 0, 0),
-    ZIndex = 2
-	}), "Stroke").Parent = SearchInner
+		-- Ligne verticale droite
+		AddThemeObject(SetProps(MakeElement("Frame"), {
+			Size = UDim2.new(0, 1, 1, 0),
+			Position = UDim2.new(1, -1, 0, 0),
+			ZIndex = 2
+		}), "Stroke").Parent = SearchInner
+
+		-- Ligne horizontale bas
+		AddThemeObject(SetProps(MakeElement("Frame"), {
+			Size = UDim2.new(1, 0, 0, 1),
+			Position = UDim2.new(0, 0, 1, -1),
+			ZIndex = 2
+		}), "Stroke").Parent = SearchInner
 
 		local SearchIcon = AddThemeObject(SetProps(MakeElement("Image", "search"), {
 			AnchorPoint = Vector2.new(0, 0.5),
@@ -744,6 +758,8 @@ AddThemeObject(SetProps(MakeElement("Frame"), {
 		MainWindow.Visible = true
 		MobileReopenButton.Visible = false
 	end)
+
+	MakeDraggable(MobileReopenButton, MobileReopenButton)
 
 	AddConnection(MinimizeBtn.MouseButton1Up, function()
 		if Minimized then
@@ -1962,6 +1978,18 @@ function OrionLib:MakeNotifi(Configs)
 end
 
 function OrionLib:Destroy()
+	-- Désactiver tous les toggles
+	for _, Flag in pairs(OrionLib.Flags) do
+		if Flag.Type == "Toggle" and Flag.Value == true then
+			pcall(function() Flag:Set(false) end)
+		end
+	end
+	-- Déconnecter toutes les connections
+	for _, Connection in next, OrionLib.Connections do
+		pcall(function() Connection:Disconnect() end)
+	end
+	OrionLib.Connections = {}
+	OrionLib.Flags = {}
 	Orion:Destroy()
 end
 
