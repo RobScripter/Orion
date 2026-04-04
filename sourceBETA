@@ -508,7 +508,7 @@ function OrionLib:MakeWindow(WindowConfig)
 		AddThemeObject(MakeElement("Stroke", Color3.fromRGB(60, 60, 60), 1), "Stroke").Parent = SearchInner
 		MakeElement("Corner", 0, 6).Parent = SearchInner
 
-		local SearchIcon = AddThemeObject(SetProps(MakeElement("Image", "rbxassetid://3926305904"), {
+		local SearchIcon = AddThemeObject(SetProps(MakeElement("Image", "search"), {
 			AnchorPoint = Vector2.new(0, 0.5),
 			Position = UDim2.new(0, 6, 0.5, 0),
 			Size = UDim2.new(0, 14, 0, 14),
