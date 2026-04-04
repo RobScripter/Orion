@@ -485,32 +485,30 @@ function OrionLib:MakeWindow(WindowConfig)
 	local SearchBox = nil
 
 	if WindowConfig.SearchEnabled then
-		SearchBar = AddThemeObject(SetChildren(SetProps(MakeElement("Frame"), {
+		SearchBar = AddThemeObject(SetProps(MakeElement("Frame"), {
 			Size = UDim2.new(1, 0, 0, SearchBarHeight),
 			Position = UDim2.new(0, 0, 0, 0),
 			ZIndex = 2,
-			Name = "SearchBar"
-		}), {
-			AddThemeObject(SetProps(MakeElement("Frame"), {
-				Size = UDim2.new(1, -16, 0, 26),
-				Position = UDim2.new(0, 8, 0.5, -13),
-				ZIndex = 2
-			}), "Second"),
+			Name = "SearchBar",
+			ClipsDescendants = true
 		}), "Second")
 
 		local SearchInner = AddThemeObject(SetProps(MakeElement("Frame"), {
-    	Size = UDim2.new(1, 0, 0, 40),  -- pleine largeur, plus de -16
-    	Position = UDim2.new(0, 0, 0, 0),  -- plus de décalage
-    	ZIndex = 2,
-    	Parent = SearchBar
-}), "Second")
+			Size = UDim2.new(1, 0, 1, 0),
+			Position = UDim2.new(0, 0, 0, 0),
+			ZIndex = 2,
+			Parent = SearchBar
+		}), "Second")
 
-		AddThemeObject(MakeElement("Stroke", Color3.fromRGB(60, 60, 60), 1), "Stroke").Parent = SearchInner
-		MakeElement("Corner", 0, 0).Parent = SearchInner
+		AddThemeObject(SetProps(MakeElement("Frame"), {
+			Size = UDim2.new(1, 0, 0, 1),
+			Position = UDim2.new(0, 0, 1, -1),
+			ZIndex = 2
+		}), "Stroke").Parent = SearchInner
 
 		local SearchIcon = AddThemeObject(SetProps(MakeElement("Image", "search"), {
 			AnchorPoint = Vector2.new(0, 0.5),
-			Position = UDim2.new(0, 6, 0.5, 0),
+			Position = UDim2.new(0, 10, 0.5, 0),
 			Size = UDim2.new(0, 14, 0, 14),
 			ImageTransparency = 0.4,
 			ZIndex = 3
@@ -518,8 +516,8 @@ function OrionLib:MakeWindow(WindowConfig)
 		SearchIcon.Parent = SearchInner
 
 		SearchBox = Create("TextBox", {
-			Size = UDim2.new(1, -28, 1, 0),
-			Position = UDim2.new(0, 24, 0, 0),
+			Size = UDim2.new(1, -34, 1, 0),
+			Position = UDim2.new(0, 30, 0, 0),
 			BackgroundTransparency = 1,
 			Text = "",
 			PlaceholderText = "Search...",
@@ -637,6 +635,7 @@ function OrionLib:MakeWindow(WindowConfig)
 		SearchBar.Size = UDim2.new(1, 0, 0, SearchBarHeight)
 
 		TabHolder.Position = UDim2.new(0, 0, 0, SearchBarHeight)
+		TabHolder.Size = UDim2.new(1, 0, 1, -(50 + SearchBarHeight))
 
 		AddConnection(SearchBox:GetPropertyChangedSignal("Text"), function()
 			local Query = SearchBox.Text:lower()
