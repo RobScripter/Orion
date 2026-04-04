@@ -888,7 +888,28 @@ function OrionLib:MakeWindow(WindowConfig)
 			TweenService:Create(TabFrame.Ico, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {ImageTransparency = 0}):Play()
 			TweenService:Create(TabFrame.Title, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {TextTransparency = 0}):Play()
 			TabFrame.Title.Font = Enum.Font.FredokaOne
-			Container.Visible = true   
+			Container.Visible = true
+
+			-- Animation: les elements apparaissent l'un apres l'autre
+			task.spawn(function()
+				local Items = {}
+				for _, Child in next, Container:GetChildren() do
+					if Child:IsA("Frame") or Child:IsA("TextButton") then
+						table.insert(Items, Child)
+					end
+				end
+				for _, Item in next, Items do
+					Item.Position = UDim2.new(0, -20, Item.Position.Y.Scale, Item.Position.Y.Offset)
+					Item.BackgroundTransparency = 1
+				end
+				for i, Item in next, Items do
+					task.wait(0.04)
+					TweenService:Create(Item, TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+						Position = UDim2.new(0, 0, Item.Position.Y.Scale, Item.Position.Y.Offset),
+						BackgroundTransparency = 0.7
+					}):Play()
+				end
+			end)
 		end)
 
 		local function GetElements(ItemParent)
