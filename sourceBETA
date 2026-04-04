@@ -499,14 +499,14 @@ function OrionLib:MakeWindow(WindowConfig)
 		}), "Second")
 
 		local SearchInner = AddThemeObject(SetProps(MakeElement("Frame"), {
-			Size = UDim2.new(1, -16, 0, 26),
-			Position = UDim2.new(0, 8, 0.5, -13),
-			ZIndex = 2,
-			Parent = SearchBar
-		}), "Second")
+    	Size = UDim2.new(1, 0, 0, 40),  -- pleine largeur, plus de -16
+    	Position = UDim2.new(0, 0, 0, 0),  -- plus de décalage
+    	ZIndex = 2,
+    	Parent = SearchBar
+}), "Second")
 
 		AddThemeObject(MakeElement("Stroke", Color3.fromRGB(60, 60, 60), 1), "Stroke").Parent = SearchInner
-		MakeElement("Corner", 0, 6).Parent = SearchInner
+		MakeElement("Corner", 0, 0).Parent = SearchInner
 
 		local SearchIcon = AddThemeObject(SetProps(MakeElement("Image", "search"), {
 			AnchorPoint = Vector2.new(0, 0.5),
