@@ -48,7 +48,7 @@ else
 end
 
 
--- Détruire l'ancien Orion s'il existe déjà
+-- DÃ©truire l'ancien Orion s'il existe dÃ©jÃ 
 local OldOrion = (gethui and gethui() or game:GetService("CoreGui")):FindFirstChild("Orion")
 if OldOrion then
 	OldOrion:Destroy()
@@ -125,7 +125,7 @@ end
 local function Create(Name, Properties, Children)
 	local Object = Instance.new(Name)
 
-	-- propriétés (safe)
+	-- propriÃ©tÃ©s (safe)
 	if typeof(Properties) == "table" then
 		for i, v in pairs(Properties) do
 			pcall(function()
@@ -474,7 +474,7 @@ function OrionLib:MakeWindow(WindowConfig)
 	local UIHidden = false
 
 	-- ================================================================
-	-- SYSTEME D'ANIMATION MEGA — avec queue pendant le loading
+	-- SYSTEME D'ANIMATION MEGA â€” avec queue pendant le loading
 	-- ================================================================
 	local _introIndex = 0
 	local _isLoading = false
@@ -596,13 +596,13 @@ function OrionLib:MakeWindow(WindowConfig)
 
 			-- Phase 5: Underline glow
 			task.spawn(function()
-	-- 🔥 Supprime une éventuelle ancienne barre
+	-- ðŸ”¥ Supprime une Ã©ventuelle ancienne barre
 	local existing = frame:FindFirstChild("Underline")
 	if existing then
 		existing:Destroy()
 	end
 
-	-- ✅ Crée UNE seule underline
+	-- âœ… CrÃ©e UNE seule underline
 	local underline = Instance.new("Frame")
 	underline.Name = "Underline"
 	underline.Size = UDim2.new(0, 0, 0, 1)
@@ -627,7 +627,7 @@ function OrionLib:MakeWindow(WindowConfig)
 
 	task.wait(0.35)
 
-	-- 🔥 Vérifie avant de destroy (anti bug)
+	-- ðŸ”¥ VÃ©rifie avant de destroy (anti bug)
 	if underline and underline.Parent then
 		underline:Destroy()
 	end
@@ -1018,7 +1018,7 @@ end)
 		}),
 	}), "Second")
 
-	-- Intégration de la SearchBar dans WindowStuff
+	-- IntÃ©gration de la SearchBar dans WindowStuff
 	if WindowConfig.SearchEnabled and SearchBar then
 		SearchBar.Parent = WindowStuff
 		SearchBar.Position = UDim2.new(0, 0, 0, 0)
@@ -1455,7 +1455,7 @@ end)
 			end
 		end)
 
-		-- ========== 7. INTRO ICON — elastic pop + pulse + multi-glow + flicker ==========
+		-- ========== 7. INTRO ICON â€” elastic pop + pulse + multi-glow + flicker ==========
 		local IntroIcon = Instance.new("ImageLabel")
 		IntroIcon.Size = UDim2.new(0, 0, 0, 0)
 		IntroIcon.Position = UDim2.new(0.5, 0, 0.26, 0)
@@ -1541,7 +1541,7 @@ end)
 			end
 		end)
 
-		-- ========== 8. INTRO TEXT — typewriter glitch reveal + cursor ==========
+		-- ========== 8. INTRO TEXT â€” typewriter glitch reveal + cursor ==========
 		local IntroLabel = Instance.new("TextLabel")
 		IntroLabel.Size = UDim2.new(1, -40, 0, 28)
 		IntroLabel.Position = UDim2.new(0.5, 0, 0.26, 42)
@@ -2117,7 +2117,7 @@ end)
 			end
 		end)
 
-			-- ========== ADAPTIVE WAIT — adapte au temps reel de creation UI ==========
+			-- ========== ADAPTIVE WAIT â€” adapte au temps reel de creation UI ==========
 		-- Minimum 1.5s pour le spectacle visuel, puis on attend que l'UI soit prete
 		local _loadStart = tick()
 		local _minLoadTime = 1.5
@@ -2599,7 +2599,7 @@ end)
 		Click
 	}), "Second")
 
-	-- ✅ SET FIXÉ
+	-- âœ… SET FIXÃ‰
 	function Toggle:Set(Value)
 		if Toggle._busy then return end
 		Toggle.Value = Value
@@ -2619,7 +2619,7 @@ end)
 
 	Toggle:Set(Toggle.Value)
 
-	-- 🔥 CLICK FIX
+	-- ðŸ”¥ CLICK FIX
 	AddConnection(Click.MouseButton1Up, function()
 		if Toggle._busy then return end
 		Toggle._busy = true
@@ -2645,7 +2645,7 @@ end)
 		}):Play()
 	end)
 
-	-- 🔥 HOVER FIX
+	-- ðŸ”¥ HOVER FIX
 	AddConnection(Click.MouseEnter, function()
 		if Toggle._busy then return end
 
@@ -3536,241 +3536,242 @@ end
 			return ElementFunction   
 		end	
 
-		local ElementFunction = {}
+		local TabFunction = {}
 
-		function ElementFunction:AddSection(SectionConfig)
-			SectionConfig.Name = SectionConfig.Name or "Section"
+		function TabFunction:MakeTab(TabConfig)
+			TabConfig = TabConfig or {}
+			TabConfig.Name = TabConfig.Name or "Tab"
+			TabConfig.Icon = TabConfig.Icon or ""
+			TabConfig.PremiumOnly = TabConfig.PremiumOnly or false
 
-			local SectionFrame = SetChildren(SetProps(MakeElement("TFrame"), {
-				Size = UDim2.new(1, 0, 0, 26),
-				Parent = Container
+			local TabFrame = SetChildren(SetProps(MakeElement("Button"), {
+				Size = UDim2.new(1, 0, 0, 30),
+				Parent = TabHolder
 			}), {
-				AddThemeObject(SetProps(MakeElement("Label", SectionConfig.Name, 14), {
-					Size = UDim2.new(1, -12, 0, 16),
-					Position = UDim2.new(0, 0, 0, 3),
-					Font = Enum.Font.FredokaOne
-				}), "TextDark"),
-				SetChildren(SetProps(MakeElement("TFrame"), {
-					AnchorPoint = Vector2.new(0, 0),
-					Size = UDim2.new(1, 0, 1, -24),
-					Position = UDim2.new(0, 0, 0, 23),
-					Name = "Holder"
-				}), {
-					MakeElement("List", 0, 6)
-				}),
-			})
-
-			AddConnection(SectionFrame.Holder.UIListLayout:GetPropertyChangedSignal("AbsoluteContentSize"), function()
-				SectionFrame.Size = UDim2.new(1, 0, 0, SectionFrame.Holder.UIListLayout.AbsoluteContentSize.Y + 31)
-				SectionFrame.Holder.Size = UDim2.new(1, 0, 0, SectionFrame.Holder.UIListLayout.AbsoluteContentSize.Y)
-			end)
-			local SectionFunction = {}
-			for i, v in next, GetElements(SectionFrame.Holder) do
-				SectionFunction[i] = v 
-			end
-			return SectionFunction
-		end	
-
-		for i, v in next, GetElements(Container) do
-			ElementFunction[i] = v 
-		end
-
-		if TabConfig.PremiumOnly then
-			for i, v in next, ElementFunction do
-				ElementFunction[i] = function() end
-			end    
-			Container:FindFirstChild("UIListLayout"):Destroy()
-			Container:FindFirstChild("UIPadding"):Destroy()
-			SetChildren(SetProps(MakeElement("TFrame"), {
-				Size = UDim2.new(1, 0, 1, 0),
-				Parent = ItemParent
-			}), {
-				AddThemeObject(SetProps(MakeElement("Image", "rbxassetid://3610239960"), {
+				AddThemeObject(SetProps(MakeElement("Image", TabConfig.Icon), {
+					AnchorPoint = Vector2.new(0, 0.5),
 					Size = UDim2.new(0, 18, 0, 18),
-					Position = UDim2.new(0, 15, 0, 15),
-					ImageTransparency = 0.4
+					Position = UDim2.new(0, 10, 0.5, 0),
+					ImageTransparency = 0.4,
+					Name = "Ico"
 				}), "Text"),
-				AddThemeObject(SetProps(MakeElement("Label", "Unauthorised Access", 14), {
-					Size = UDim2.new(1, -38, 0, 14),
-					Position = UDim2.new(0, 38, 0, 18),
-					TextTransparency = 0.4
-				}), "Text"),
-				AddThemeObject(SetProps(MakeElement("Image", "rbxassetid://4483345875"), {
-					Size = UDim2.new(0, 56, 0, 56),
-					Position = UDim2.new(0, 84, 0, 110),
-				}), "Text"),
-				AddThemeObject(SetProps(MakeElement("Label", "Premium Features", 14), {
-					Size = UDim2.new(1, -150, 0, 14),
-					Position = UDim2.new(0, 150, 0, 112),
-					Font = Enum.Font.FredokaOne
-				}), "Text"),
-				AddThemeObject(SetProps(MakeElement("Label", "This part of the script is locked to Sirius Premium users. Purchase Premium in the Discord server (discord.gg/sirius)", 12), {
-					Size = UDim2.new(1, -200, 0, 14),
-					Position = UDim2.new(0, 150, 0, 138),
-					TextWrapped = true,
-					TextTransparency = 0.4
+				AddThemeObject(SetProps(MakeElement("Label", TabConfig.Name, 14), {
+					Size = UDim2.new(1, -35, 1, 0),
+					Position = UDim2.new(0, 35, 0, 0),
+					Font = Enum.Font.FredokaOne,
+					TextTransparency = 0.4,
+					Name = "Title"
 				}), "Text")
 			})
-		end
-		return ElementFunction   
-	end
 
-local TabFunction = {}
-function TabFunction:MakeTab(TabConfig)
-	TabConfig = TabConfig or {}
-	TabConfig.Name = TabConfig.Name or "Tab"
-	TabConfig.Icon = TabConfig.Icon or ""
-	TabConfig.PremiumOnly = TabConfig.PremiumOnly or false
-
-	local TabFrame = SetChildren(SetProps(MakeElement("Button"), {
-		Size = UDim2.new(1, 0, 0, 30),
-		Parent = TabHolder
-	}), {
-		AddThemeObject(SetProps(MakeElement("Image", TabConfig.Icon), {
-			AnchorPoint = Vector2.new(0, 0.5),
-			Size = UDim2.new(0, 18, 0, 18),
-			Position = UDim2.new(0, 10, 0.5, 0),
-			ImageTransparency = 0.4,
-			Name = "Ico"
-		}), "Text"),
-
-		AddThemeObject(SetProps(MakeElement("Label", TabConfig.Name, 14), {
-			Size = UDim2.new(1, -35, 1, 0),
-			Position = UDim2.new(0, 35, 0, 0),
-			Font = Enum.Font.FredokaOne,
-			TextTransparency = 0.4,
-			Name = "Title"
-		}), "Text")
-	})
-
-	if GetIcon(TabConfig.Icon) then
-		TabFrame.Ico.Image = GetIcon(TabConfig.Icon)
-	end
-
-	AnimateTabIntro(TabFrame, FirstTab)
-
-	local Container = AddThemeObject(SetChildren(SetProps(
-		MakeElement("ScrollFrame", Color3.fromRGB(255,255,255), 5),
-		{
-			Size = UDim2.new(1, -150, 1, -50),
-			Position = UDim2.new(0, 150, 0, 50),
-			Parent = MainWindow,
-			Visible = false,
-			Name = "ItemContainer"
-		}), {
-			MakeElement("List", 0, 6),
-			MakeElement("Padding", 15, 10, 10, 15)
-	}), "Divider")
-
-	AddConnection(Container.UIListLayout:GetPropertyChangedSignal("AbsoluteContentSize"), function()
-		Container.CanvasSize = UDim2.new(0,0,0,Container.UIListLayout.AbsoluteContentSize.Y + 30)
-	end)
-
-	local Elements = GetElements(Container)
-
-	if FirstTab then
-		FirstTab = false
-		Container.Visible = true
-		TabFrame.Title.TextTransparency = 0
-		TabFrame.Ico.ImageTransparency = 0
-	end
-
-	AddConnection(TabFrame.MouseButton1Click, function()
-
-		for _, v in pairs(MainWindow:GetChildren()) do
-			if v and v.Name == "ItemContainer" then
-				v.Visible = false
+			if GetIcon(TabConfig.Icon) then
+				TabFrame.Ico.Image = GetIcon(TabConfig.Icon)
 			end
-		end
 
-		for _, Tab in pairs(TabHolder:GetChildren()) do
-			if Tab and Tab:IsA("TextButton") then
-				if Tab:FindFirstChild("Ico") then
-					TweenService:Create(Tab.Ico, TweenInfo.new(0.25), {
+			AnimateTabIntro(TabFrame, FirstTab)
+
+			local Container = AddThemeObject(SetChildren(SetProps(
+				MakeElement("ScrollFrame", Color3.fromRGB(255, 255, 255), 5),
+				{
+					Size = UDim2.new(1, -150, 1, -50),
+					Position = UDim2.new(0, 150, 0, 50),
+					Parent = MainWindow,
+					Visible = false,
+					Name = "ItemContainer"
+				}), {
+					MakeElement("List", 0, 6),
+					MakeElement("Padding", 15, 10, 10, 15)
+				}), "Divider")
+
+			AddConnection(Container.UIListLayout:GetPropertyChangedSignal("AbsoluteContentSize"), function()
+				Container.CanvasSize = UDim2.new(0, 0, 0, Container.UIListLayout.AbsoluteContentSize.Y + 30)
+			end)
+
+			local ElementFunction = {}
+
+			function ElementFunction:AddSection(SectionConfig)
+				SectionConfig = SectionConfig or {}
+				SectionConfig.Name = SectionConfig.Name or "Section"
+
+				local SectionFrame = SetChildren(SetProps(MakeElement("TFrame"), {
+					Size = UDim2.new(1, 0, 0, 26),
+					Parent = Container
+				}), {
+					AddThemeObject(SetProps(MakeElement("Label", SectionConfig.Name, 14), {
+						Size = UDim2.new(1, -12, 0, 16),
+						Position = UDim2.new(0, 0, 0, 3),
+						Font = Enum.Font.FredokaOne
+					}), "TextDark"),
+					SetChildren(SetProps(MakeElement("TFrame"), {
+						AnchorPoint = Vector2.new(0, 0),
+						Size = UDim2.new(1, 0, 1, -24),
+						Position = UDim2.new(0, 0, 0, 23),
+						Name = "Holder"
+					}), {
+						MakeElement("List", 0, 6)
+					}),
+				})
+
+				AddConnection(SectionFrame.Holder.UIListLayout:GetPropertyChangedSignal("AbsoluteContentSize"), function()
+					SectionFrame.Size = UDim2.new(1, 0, 0, SectionFrame.Holder.UIListLayout.AbsoluteContentSize.Y + 31)
+					SectionFrame.Holder.Size = UDim2.new(1, 0, 0, SectionFrame.Holder.UIListLayout.AbsoluteContentSize.Y)
+				end)
+
+				local SectionFunction = {}
+				for i, v in next, GetElements(SectionFrame.Holder) do
+					SectionFunction[i] = v
+				end
+				return SectionFunction
+			end
+
+			for i, v in next, GetElements(Container) do
+				ElementFunction[i] = v
+			end
+
+			if TabConfig.PremiumOnly then
+				for i, _ in next, ElementFunction do
+					ElementFunction[i] = function() end
+				end
+
+				if Container:FindFirstChild("UIListLayout") then
+					Container.UIListLayout:Destroy()
+				end
+				if Container:FindFirstChild("UIPadding") then
+					Container.UIPadding:Destroy()
+				end
+
+				SetChildren(SetProps(MakeElement("TFrame"), {
+					Size = UDim2.new(1, 0, 1, 0),
+					Parent = Container
+				}), {
+					AddThemeObject(SetProps(MakeElement("Image", "rbxassetid://3610239960"), {
+						Size = UDim2.new(0, 18, 0, 18),
+						Position = UDim2.new(0, 15, 0, 15),
 						ImageTransparency = 0.4
-					}):Play()
-				end
-				if Tab:FindFirstChild("Title") then
-					TweenService:Create(Tab.Title, TweenInfo.new(0.25), {
+					}), "Text"),
+					AddThemeObject(SetProps(MakeElement("Label", "Unauthorised Access", 14), {
+						Size = UDim2.new(1, -38, 0, 14),
+						Position = UDim2.new(0, 38, 0, 18),
 						TextTransparency = 0.4
-					}):Play()
+					}), "Text"),
+					AddThemeObject(SetProps(MakeElement("Image", "rbxassetid://4483345875"), {
+						Size = UDim2.new(0, 56, 0, 56),
+						Position = UDim2.new(0, 84, 0, 110),
+					}), "Text"),
+					AddThemeObject(SetProps(MakeElement("Label", "Premium Features", 14), {
+						Size = UDim2.new(1, -150, 0, 14),
+						Position = UDim2.new(0, 150, 0, 112),
+						Font = Enum.Font.FredokaOne
+					}), "Text"),
+					AddThemeObject(SetProps(MakeElement("Label", "This part of the script is locked to Sirius Premium users. Purchase Premium in the Discord server (discord.gg/sirius)", 12), {
+						Size = UDim2.new(1, -200, 0, 14),
+						Position = UDim2.new(0, 150, 0, 138),
+						TextWrapped = true,
+						TextTransparency = 0.4
+					}), "Text")
+				})
+			end
+
+			if FirstTab then
+				FirstTab = false
+				Container.Visible = true
+				TabFrame.Title.TextTransparency = 0
+				TabFrame.Ico.ImageTransparency = 0
+			end
+
+			AddConnection(TabFrame.MouseButton1Click, function()
+				for _, v in pairs(MainWindow:GetChildren()) do
+					if v and v.Name == "ItemContainer" then
+						v.Visible = false
+					end
 				end
-			end
-		end
 
-		if TabFrame:FindFirstChild("Ico") then
-			TweenService:Create(TabFrame.Ico, TweenInfo.new(0.25), {
-				ImageTransparency = 0
-			}):Play()
-		end
-
-		if TabFrame:FindFirstChild("Title") then
-			TweenService:Create(TabFrame.Title, TweenInfo.new(0.25), {
-				TextTransparency = 0
-			}):Play()
-		end
-
-		if Container then
-			Container.Visible = true
-		end
-
-	end)
-
-	task.spawn(function()
-		if not Container then return end
-
-		local Items = {}
-
-		for _, Child in ipairs(Container:GetChildren()) do
-			if Child and (Child:IsA("Frame") or Child:IsA("TextButton")) then
-				table.insert(Items, Child)
-			end
-		end
-
-		table.sort(Items, function(a, b)
-			return (a.LayoutOrder or 0) < (b.LayoutOrder or 0)
-		end)
-
-		for _, Item in ipairs(Items) do
-			Item.BackgroundTransparency = 1
-
-			for _, desc in ipairs(Item:GetDescendants()) do
-				if desc:IsA("TextLabel") then
-					desc.TextTransparency = 1
-				elseif desc:IsA("ImageLabel") or desc:IsA("ImageButton") then
-					desc.ImageTransparency = 1
+				for _, Tab in pairs(TabHolder:GetChildren()) do
+					if Tab and Tab:IsA("TextButton") then
+						if Tab:FindFirstChild("Ico") then
+							TweenService:Create(Tab.Ico, TweenInfo.new(0.25), {
+								ImageTransparency = 0.4
+							}):Play()
+						end
+						if Tab:FindFirstChild("Title") then
+							TweenService:Create(Tab.Title, TweenInfo.new(0.25), {
+								TextTransparency = 0.4
+							}):Play()
+						end
+					end
 				end
-			end
-		end
 
-		for _, Item in ipairs(Items) do
-			task.wait(0.04)
-
-			TweenService:Create(Item, TweenInfo.new(0.3), {
-				BackgroundTransparency = 0.7
-			}):Play()
-
-			for _, desc in ipairs(Item:GetDescendants()) do
-				if desc:IsA("TextLabel") then
-					TweenService:Create(desc, TweenInfo.new(0.3), {
-						TextTransparency = 0
-					}):Play()
-				elseif desc:IsA("ImageLabel") or desc:IsA("ImageButton") then
-					TweenService:Create(desc, TweenInfo.new(0.3), {
+				if TabFrame:FindFirstChild("Ico") then
+					TweenService:Create(TabFrame.Ico, TweenInfo.new(0.25), {
 						ImageTransparency = 0
 					}):Play()
 				end
-			end
+
+				if TabFrame:FindFirstChild("Title") then
+					TweenService:Create(TabFrame.Title, TweenInfo.new(0.25), {
+						TextTransparency = 0
+					}):Play()
+				end
+
+				Container.Visible = true
+			end)
+
+			task.spawn(function()
+				if not Container then
+					return
+				end
+
+				local Items = {}
+
+				for _, Child in ipairs(Container:GetChildren()) do
+					if Child and (Child:IsA("Frame") or Child:IsA("TextButton")) then
+						table.insert(Items, Child)
+					end
+				end
+
+				table.sort(Items, function(a, b)
+					return (a.LayoutOrder or 0) < (b.LayoutOrder or 0)
+				end)
+
+				for _, Item in ipairs(Items) do
+					Item.BackgroundTransparency = 1
+
+					for _, desc in ipairs(Item:GetDescendants()) do
+						if desc:IsA("TextLabel") then
+							desc.TextTransparency = 1
+						elseif desc:IsA("ImageLabel") or desc:IsA("ImageButton") then
+							desc.ImageTransparency = 1
+						end
+					end
+				end
+
+				for _, Item in ipairs(Items) do
+					task.wait(0.04)
+
+					TweenService:Create(Item, TweenInfo.new(0.3), {
+						BackgroundTransparency = 0.7
+					}):Play()
+
+					for _, desc in ipairs(Item:GetDescendants()) do
+						if desc:IsA("TextLabel") then
+							TweenService:Create(desc, TweenInfo.new(0.3), {
+								TextTransparency = 0
+							}):Play()
+						elseif desc:IsA("ImageLabel") or desc:IsA("ImageButton") then
+							TweenService:Create(desc, TweenInfo.new(0.3), {
+								ImageTransparency = 0
+							}):Play()
+						end
+					end
+				end
+			end)
+
+			return ElementFunction
 		end
-	end)
 
-	-- ✅ FIX IMPORTANT (manquait)
-	return Elements
-end
+		return TabFunction
+	end
 
--- ✅ TON CODE CONTINUE NORMALEMENT
-return TabFunction
-end
 
 function OrionLib:MakeNotifi(Configs)
 	Configs = Configs or {}
@@ -3784,13 +3785,13 @@ function OrionLib:MakeNotifi(Configs)
 end
 
 function OrionLib:Destroy()
-	-- Désactiver tous les toggles
+	-- DÃ©sactiver tous les toggles
 	for _, Flag in pairs(OrionLib.Flags) do
 		if Flag.Type == "Toggle" and Flag.Value == true then
 			pcall(function() Flag:Set(false) end)
 		end
 	end
-	-- Déconnecter toutes les connections
+	-- DÃ©connecter toutes les connections
 	for _, Connection in next, OrionLib.Connections do
 		pcall(function() Connection:Disconnect() end)
 	end
