@@ -2410,75 +2410,103 @@ AddConnection(TabFrame.MouseButton1Click, function()
 		tabBusy = false
 	end)
 end)
-			for _, ItemContainer in next, MainWindow:GetChildren() do
-				if ItemContainer.Name == "ItemContainer" then
-					ItemContainer.Visible = false
-				end    
-			end  
-			TweenService:Create(TabFrame.Ico, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {ImageTransparency = 0}):Play()
-			TweenService:Create(TabFrame.Title, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {TextTransparency = 0}):Play()
-			TabFrame.Title.Font = Enum.Font.FredokaOne
-			Container.Visible = true
+for _, ItemContainer in next, MainWindow:GetChildren() do
+	if ItemContainer and ItemContainer.Name == "ItemContainer" then
+		ItemContainer.Visible = false
+	end    
+end  
 
-				-- Animation: les elements apparaissent l'un apres l'autre avec slide + fade
+-- 🔥 sécurise les éléments avant tween
+if TabFrame and TabFrame:FindFirstChild("Ico") then
+	TweenService:Create(TabFrame.Ico, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+		ImageTransparency = 0
+	}):Play()
+end
+
+if TabFrame and TabFrame:FindFirstChild("Title") then
+	TweenService:Create(TabFrame.Title, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+		TextTransparency = 0
+	}):Play()
+	TabFrame.Title.Font = Enum.Font.FredokaOne
+end
+
+if Container then
+	Container.Visible = true
+end
+
+-- 🔥 Animation des éléments
+task.spawn(function()
+	if not Container then return end
+
+	local Items = {}
+	for _, Child in next, Container:GetChildren() do
+		if Child and (Child:IsA("Frame") or Child:IsA("TextButton")) then
+			table.insert(Items, Child)
+		end
+	end
+
+	-- cacher
+	for _, Item in next, Items do
+		if Item then
+			Item.Position = UDim2.new(0, 25, Item.Position.Y.Scale, Item.Position.Y.Offset)
+			Item.BackgroundTransparency = 1
+
+			for _, desc in next, Item:GetDescendants() do
+				if desc:IsA("TextLabel") then
+					desc.TextTransparency = 1
+				elseif desc:IsA("ImageLabel") or desc:IsA("ImageButton") then
+					desc.ImageTransparency = 1
+				end
+			end
+		end
+	end
+
+	-- reveal
+	for _, Item in next, Items do
+		if not Item then continue end
+
+		task.wait(0.045)
+
+		TweenService:Create(Item, TweenInfo.new(0.35, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+			Position = UDim2.new(0, 0, Item.Position.Y.Scale, Item.Position.Y.Offset),
+			BackgroundTransparency = 0.7
+		}):Play()
+
+		-- enfants
+		for _, desc in next, Item:GetDescendants() do
+			if desc:IsA("TextLabel") then
+				TweenService:Create(desc, TweenInfo.new(0.3), {
+					TextTransparency = desc.Name == "Content" and 0 or (desc.Name == "Value" and 0.8 or 0)
+				}):Play()
+			elseif desc:IsA("ImageLabel") or desc:IsA("ImageButton") then
+				TweenService:Create(desc, TweenInfo.new(0.3), {
+					ImageTransparency = 0
+				}):Play()
+			end
+		end
+
+		-- 🔥 FIX SLIDER (ANTI NIL)
+		local sliderDrag = Item:FindFirstChild("Frame")
+		if sliderDrag then
+			local innerDrag = sliderDrag:FindFirstChildWhichIsA("Frame")
+
+			if innerDrag and innerDrag:IsA("Frame") and innerDrag.Name ~= "UICorner" then
+				local savedSize = innerDrag.Size
+				innerDrag.Size = UDim2.new(0, 0, 1, 0)
+
 				task.spawn(function()
-					local Items = {}
-					for _, Child in next, Container:GetChildren() do
-						if Child:IsA("Frame") or Child:IsA("TextButton") then
-							table.insert(Items, Child)
-						end
-					end
-					-- Cacher tous les elements d'abord
-					for _, Item in next, Items do
-						Item.Position = UDim2.new(0, 25, Item.Position.Y.Scale, Item.Position.Y.Offset)
-						Item.BackgroundTransparency = 1
-						-- Cacher texte et images aussi
-						for _, desc in next, Item:GetDescendants() do
-							if desc:IsA("TextLabel") then
-								desc.TextTransparency = 1
-							elseif desc:IsA("ImageLabel") or desc:IsA("ImageButton") then
-								desc.ImageTransparency = 1
-							end
-						end
-					end
-					-- Reveal un par un avec stagger
-					for _, Item in next, Items do
-						task.wait(0.045)
-						TweenService:Create(Item, TweenInfo.new(0.35, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
-							Position = UDim2.new(0, 0, Item.Position.Y.Scale, Item.Position.Y.Offset),
-							BackgroundTransparency = 0.7
+					task.wait(0.2)
+
+					if innerDrag and innerDrag.Parent then
+						TweenService:Create(innerDrag, TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+							Size = savedSize
 						}):Play()
-						-- Reveal enfants (texte, images)
-						for _, desc in next, Item:GetDescendants() do
-							if desc:IsA("TextLabel") then
-								TweenService:Create(desc, TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
-									TextTransparency = desc.Name == "Content" and 0 or (desc.Name == "Value" and 0.8 or 0)
-								}):Play()
-							elseif desc:IsA("ImageLabel") or desc:IsA("ImageButton") then
-								TweenService:Create(desc, TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
-									ImageTransparency = 0
-								}):Play()
-							end
-						end
-						-- Si c'est un slider, animer le remplissage
-						local sliderDrag = Item:FindFirstChild("Frame")
-						if sliderDrag then
-							local innerDrag = sliderDrag:FindFirstChildWhichIsA("Frame")
-							if innerDrag and innerDrag.Name ~= "UICorner" then
-								local savedSize = innerDrag.Size
-								innerDrag.Size = UDim2.new(0, 0, 1, 0)
-								task.spawn(function()
-									task.wait(0.2)
-									TweenService:Create(innerDrag, TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
-										Size = savedSize
-									}):Play()
-								end)
-							end
-						end
 					end
 				end)
-		end)
-
+			end
+		end
+	end
+end)
 		local function GetElements(ItemParent)
 			local ElementFunction = {}
 			function ElementFunction:AddLabel(Text)
@@ -3972,5 +4000,4 @@ function OrionLib:Destroy()
 	Orion:Destroy()
 end
 
-print("Orion chargé")
 return OrionLib
