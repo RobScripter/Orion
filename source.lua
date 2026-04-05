@@ -2718,264 +2718,158 @@ end)
 
 				return Button
 			end    
+
 			function ElementFunction:AddToggle(ToggleConfig)
-				ToggleConfig = ToggleConfig or {}
-				ToggleConfig.Name = ToggleConfig.Name or "Toggle"
-				ToggleConfig.Default = ToggleConfig.Default or false
-				ToggleConfig.Callback = ToggleConfig.Callback or function() end
-				ToggleConfig.Color = ToggleConfig.Color or Color3.fromRGB(9, 99, 195)
-				ToggleConfig.Flag = ToggleConfig.Flag or nil
-				ToggleConfig.Save = ToggleConfig.Save or false
+	ToggleConfig = ToggleConfig or {}
+	ToggleConfig.Name = ToggleConfig.Name or "Toggle"
+	ToggleConfig.Default = ToggleConfig.Default or false
+	ToggleConfig.Callback = ToggleConfig.Callback or function() end
+	ToggleConfig.Color = ToggleConfig.Color or Color3.fromRGB(9, 99, 195)
+	ToggleConfig.Flag = ToggleConfig.Flag or nil
+	ToggleConfig.Save = ToggleConfig.Save or false
 
-				local Toggle = {Value = ToggleConfig.Default, Save = ToggleConfig.Save}
+	local Toggle = {Value = ToggleConfig.Default, Save = ToggleConfig.Save}
+	Toggle._busy = false
 
-				local Click = SetProps(MakeElement("Button"), {
-					Size = UDim2.new(1, 0, 1, 0)
-				})
+	local Click = SetProps(MakeElement("Button"), {
+		Size = UDim2.new(1, 0, 1, 0)
+	})
 
-				local ToggleBox = SetChildren(SetProps(MakeElement("RoundFrame", ToggleConfig.Color, 0, 4), {
-					Size = UDim2.new(0, 24, 0, 24),
-					Position = UDim2.new(1, -24, 0.5, 0),
-					AnchorPoint = Vector2.new(0.5, 0.5)
-				}), {
-					SetProps(MakeElement("Stroke"), {
-						Color = ToggleConfig.Color,
-						Name = "Stroke",
-						Transparency = 0.5
-					}),
-					SetProps(MakeElement("Image", "rbxassetid://3944680095"), {
-						Size = UDim2.new(0, 20, 0, 20),
-						AnchorPoint = Vector2.new(0.5, 0.5),
-						Position = UDim2.new(0.5, 0, 0.5, 0),
-						ImageColor3 = Color3.fromRGB(255, 255, 255),
-						Name = "Ico"
-					}),
-				})
+	local ToggleBox = SetChildren(SetProps(MakeElement("RoundFrame", ToggleConfig.Color, 0, 4), {
+		Size = UDim2.new(0, 24, 0, 24),
+		Position = UDim2.new(1, -24, 0.5, 0),
+		AnchorPoint = Vector2.new(0.5, 0.5)
+	}), {
+		SetProps(MakeElement("Stroke"), {
+			Color = ToggleConfig.Color,
+			Name = "Stroke",
+			Transparency = 0.5
+		}),
+		SetProps(MakeElement("Image", "rbxassetid://3944680095"), {
+			Size = UDim2.new(0, 20, 0, 20),
+			AnchorPoint = Vector2.new(0.5, 0.5),
+			Position = UDim2.new(0.5, 0, 0.5, 0),
+			ImageColor3 = Color3.fromRGB(255, 255, 255),
+			Name = "Ico"
+		}),
+	})
 
-				local ToggleFrame = AddThemeObject(SetChildren(SetProps(MakeElement("RoundFrame", Color3.fromRGB(255, 255, 255), 0, 5), {
-					Size = UDim2.new(1, 0, 0, 38),
-					Parent = ItemParent
-				}), {
-					AddThemeObject(SetProps(MakeElement("Label", ToggleConfig.Name, 15), {
-						Size = UDim2.new(1, -12, 1, 0),
-						Position = UDim2.new(0, 12, 0, 0),
-						Font = Enum.Font.FredokaOne,
-						Name = "Content"
-					}), "Text"),
-					AddThemeObject(MakeElement("Stroke"), "Stroke"),
-					ToggleBox,
-					Click
-				}), "Second")
+	local ToggleFrame = AddThemeObject(SetChildren(SetProps(MakeElement("RoundFrame", Color3.fromRGB(255,255,255), 0, 5), {
+		Size = UDim2.new(1, 0, 0, 38),
+		Parent = ItemParent
+	}), {
+		AddThemeObject(SetProps(MakeElement("Label", ToggleConfig.Name, 15), {
+			Size = UDim2.new(1, -12, 1, 0),
+			Position = UDim2.new(0, 12, 0, 0),
+			Name = "Content"
+		}), "Text"),
+		AddThemeObject(MakeElement("Stroke"), "Stroke"),
+		ToggleBox,
+		Click
+	}), "Second")
 
-					function Toggle:Set(Value)
-					Toggle.Value = Value
-					-- === MEGA TOGGLE ANIMATION ===
-					-- 1. Scale punch sur la checkbox (shrink puis bounce back)
-					task.spawn(function()
-						TweenService:Create(ToggleBox, TweenInfo.new(0.08, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-							Size = UDim2.new(0, 18, 0, 18)
-						}):Play()
-						task.wait(0.08)
-						TweenService:Create(ToggleBox, TweenInfo.new(0.3, Enum.EasingStyle.Elastic, Enum.EasingDirection.Out), {
-							Size = UDim2.new(0, 24, 0, 24)
-						}):Play()
-					end)
-					-- 2. Rotation snap
-					task.spawn(function()
-						TweenService:Create(ToggleBox, TweenInfo.new(0.05, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-							Rotation = Toggle.Value and 8 or -8
-						}):Play()
-						task.wait(0.05)
-						TweenService:Create(ToggleBox, TweenInfo.new(0.25, Enum.EasingStyle.Elastic, Enum.EasingDirection.Out), {
-							Rotation = 0
-						}):Play()
-					end)
-					-- 3. Background color + stroke + icon
-					TweenService:Create(ToggleBox, TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = Toggle.Value and ToggleConfig.Color or OrionLib.Themes.Default.Divider}):Play()
-					TweenService:Create(ToggleBox.Stroke, TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Color = Toggle.Value and ToggleConfig.Color or OrionLib.Themes.Default.Stroke}):Play()
-					-- 4. Checkmark icon: bounce in ou shrink out
-					if Toggle.Value then
-						ToggleBox.Ico.Size = UDim2.new(0, 0, 0, 0)
-						ToggleBox.Ico.ImageTransparency = 0
-						ToggleBox.Ico.Rotation = -45
-						TweenService:Create(ToggleBox.Ico, TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-							Size = UDim2.new(0, 20, 0, 20),
-							Rotation = 0
-						}):Play()
-					else
-						TweenService:Create(ToggleBox.Ico, TweenInfo.new(0.15, Enum.EasingStyle.Quint, Enum.EasingDirection.In), {
-							Size = UDim2.new(0, 0, 0, 0),
-							ImageTransparency = 1,
-							Rotation = 45
-						}):Play()
-					end
-					-- 5. Glow ring ripple
-					task.spawn(function()
-						local ring = Instance.new("UIStroke")
-						ring.Color = Toggle.Value and ToggleConfig.Color or Color3.fromRGB(180, 180, 180)
-						ring.Transparency = 0.2
-						ring.Thickness = 3
-						ring.Parent = ToggleBox
-						TweenService:Create(ring, TweenInfo.new(0.4, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
-							Transparency = 1,
-							Thickness = 8
-						}):Play()
-						task.wait(0.45)
-						ring:Destroy()
-					end)
-					-- 6. Flash overlay sur la ToggleFrame
-					task.spawn(function()
-						local flash = Instance.new("Frame")
-						flash.Size = UDim2.new(1, 0, 1, 0)
-						flash.BackgroundColor3 = Toggle.Value and ToggleConfig.Color or Color3.fromRGB(100, 100, 100)
-						flash.BackgroundTransparency = 0.85
-						flash.BorderSizePixel = 0
-						flash.ZIndex = ToggleFrame.ZIndex + 5
-						flash.Parent = ToggleFrame
-						Instance.new("UICorner", flash).CornerRadius = UDim.new(0, 5)
-						TweenService:Create(flash, TweenInfo.new(0.35, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
-							BackgroundTransparency = 1
-						}):Play()
-						task.wait(0.4)
-						flash:Destroy()
-					end)
-					-- 7. Glow sweep sur la frame
-					task.spawn(function()
-						local sweep = Instance.new("Frame")
-						sweep.Size = UDim2.new(0, 4, 1, 0)
-						sweep.Position = Toggle.Value and UDim2.new(0, 0, 0, 0) or UDim2.new(1, 0, 0, 0)
-						sweep.BackgroundColor3 = Toggle.Value and ToggleConfig.Color or Color3.fromRGB(150, 150, 150)
-						sweep.BackgroundTransparency = 0.6
-						sweep.BorderSizePixel = 0
-						sweep.ZIndex = ToggleFrame.ZIndex + 5
-						sweep.Parent = ToggleFrame
-						TweenService:Create(sweep, TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
-							Position = Toggle.Value and UDim2.new(1, 0, 0, 0) or UDim2.new(0, 0, 0, 0),
-							BackgroundTransparency = 1
-						}):Play()
-						task.wait(0.35)
-						sweep:Destroy()
-					end)
-					-- 8. Texte glitch rapide
-					task.spawn(function()
-						local label = ToggleFrame:FindFirstChild("Content")
-						if label and label:IsA("TextLabel") then
-							local origText = label.Text
-							for _ = 1, 2 do
-								local g = ""
-								for c = 1, #origText do
-									if math.random() < 0.3 then
-										g = g .. _glitchCharsAnim[math.random(1, #_glitchCharsAnim)]
-									else
-										g = g .. string.sub(origText, c, c)
-									end
-								end
-								label.Text = g
-								task.wait(0.03)
-							end
-							label.Text = origText
-						end
-					end)
-					ToggleConfig.Callback(Toggle.Value)
-				end    
+	-- ✅ SET FIXÉ
+	function Toggle:Set(Value)
+		if Toggle._busy then return end
+		Toggle.Value = Value
 
-				Toggle:Set(Toggle.Value)
+		TweenService:Create(ToggleBox, TweenInfo.new(0.25), {
+			BackgroundColor3 = Toggle.Value and ToggleConfig.Color or OrionLib.Themes.Default.Divider
+		}):Play()
 
-				-- Animation d'intro toggle (frame slide + checkbox pop)
-				AnimateElementIntro(ToggleFrame, "toggle")
-				AnimateToggleIntro(ToggleBox)
+		TweenService:Create(ToggleBox.Stroke, TweenInfo.new(0.25), {
+			Color = Toggle.Value and ToggleConfig.Color or OrionLib.Themes.Default.Stroke
+		}):Play()
 
-					AddConnection(Click.MouseEnter, function()
-	-- 🔥 cancel ancien tween (optionnel mais propre)
-	if ToggleFrame._hoverTween then ToggleFrame._hoverTween:Cancel() end
-	if ToggleBox._sizeTween then ToggleBox._sizeTween:Cancel() end
+		ToggleBox.Ico.Visible = Toggle.Value
 
-	-- 🎨 Background hover
-	ToggleFrame._hoverTween = TweenService:Create(
-		ToggleFrame,
-		TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out),
-		{
+		ToggleConfig.Callback(Toggle.Value)
+	end
+
+	Toggle:Set(Toggle.Value)
+
+	-- 🔥 CLICK FIX
+	AddConnection(Click.MouseButton1Up, function()
+		if Toggle._busy then return end
+		Toggle._busy = true
+
+		TweenService:Create(ToggleFrame, TweenInfo.new(0.2), {
+			Size = UDim2.new(1, 0, 0, 38)
+		}):Play()
+
+		SaveCfg(game.GameId)
+
+		Toggle:Set(not Toggle.Value)
+
+		task.delay(0.2, function()
+			Toggle._busy = false
+		end)
+	end)
+
+	AddConnection(Click.MouseButton1Down, function()
+		if Toggle._busy then return end
+
+		TweenService:Create(ToggleFrame, TweenInfo.new(0.1), {
+			Size = UDim2.new(1, -4, 0, 36)
+		}):Play()
+	end)
+
+	-- 🔥 HOVER FIX
+	AddConnection(Click.MouseEnter, function()
+		if Toggle._busy then return end
+
+		if ToggleFrame._hoverTween then ToggleFrame._hoverTween:Cancel() end
+
+		ToggleFrame._hoverTween = TweenService:Create(ToggleFrame, TweenInfo.new(0.2), {
 			BackgroundColor3 = Color3.fromRGB(
 				OrionLib.Themes[OrionLib.SelectedTheme].Second.R * 255 + 3,
 				OrionLib.Themes[OrionLib.SelectedTheme].Second.G * 255 + 3,
 				OrionLib.Themes[OrionLib.SelectedTheme].Second.B * 255 + 3
 			)
-		}
-	)
-	ToggleFrame._hoverTween:Play()
+		})
+		ToggleFrame._hoverTween:Play()
 
-	-- 📦 Checkbox scale
-	ToggleBox._sizeTween = TweenService:Create(
-		ToggleBox,
-		TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out),
-		{
-			Size = UDim2.new(0, 26, 0, 26)
-		}
-	)
-	ToggleBox._sizeTween:Play()
+		local old = ToggleFrame:FindFirstChild("_line")
+		if old then old:Destroy() end
 
-	-- ❌ Supprime ancienne ligne si existe
-	local old = ToggleFrame:FindFirstChild("_toggleHoverLine")
-	if old then old:Destroy() end
+		local line = Instance.new("Frame")
+		line.Name = "_line"
+		line.Size = UDim2.new(0,0,0,1)
+		line.Position = UDim2.new(0,0,1,-1)
+		line.BackgroundColor3 = ToggleConfig.Color
+		line.BorderSizePixel = 0
+		line.Parent = ToggleFrame
 
-	-- ✅ Crée UNE SEULE ligne
-	local hoverLine = Instance.new("Frame")
-	hoverLine.Name = "_toggleHoverLine"
-	hoverLine.Size = UDim2.new(0, 0, 0, 1)
-	hoverLine.Position = UDim2.new(0, 0, 1, -1)
-	hoverLine.BackgroundColor3 = Toggle.Value and ToggleConfig.Color or Color3.fromRGB(100, 150, 255)
-	hoverLine.BackgroundTransparency = 0.5
-	hoverLine.BorderSizePixel = 0
-	hoverLine.ZIndex = ToggleFrame.ZIndex + 3
-	hoverLine.Parent = ToggleFrame
-
-	TweenService:Create(hoverLine, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
-		Size = UDim2.new(1, 0, 0, 1)
-	}):Play()
-end)
-			AddConnection(Click.MouseLeave, function()
-	-- reset size
-	TweenService:Create(ToggleBox, TweenInfo.new(0.2), {
-		Size = UDim2.new(0, 24, 0, 24)
-	}):Play()
-
-	-- remove line proprement
-	local line = ToggleFrame:FindFirstChild("_toggleHoverLine")
-	if line then
 		TweenService:Create(line, TweenInfo.new(0.2), {
-			Size = UDim2.new(0, 0, 0, 1),
-			BackgroundTransparency = 1
+			Size = UDim2.new(1,0,0,1)
 		}):Play()
+	end)
 
-		task.delay(0.2, function()
-			if line then line:Destroy() end
-		end)
+	AddConnection(Click.MouseLeave, function()
+		if Toggle._busy then return end
+
+		local line = ToggleFrame:FindFirstChild("_line")
+		if line then
+			TweenService:Create(line, TweenInfo.new(0.2), {
+				Size = UDim2.new(0,0,0,1)
+			}):Play()
+			task.delay(0.2, function()
+				if line then line:Destroy() end
+			end)
+		end
+
+		TweenService:Create(ToggleBox, TweenInfo.new(0.2), {
+			Size = UDim2.new(0,24,0,24)
+		}):Play()
+	end)
+
+	if ToggleConfig.Flag then
+		OrionLib.Flags[ToggleConfig.Flag] = Toggle
 	end
-end)
 
-				AddConnection(Click.MouseButton1Up, function()
-					TweenService:Create(ToggleFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = Color3.fromRGB(OrionLib.Themes[OrionLib.SelectedTheme].Second.R * 255 + 3, OrionLib.Themes[OrionLib.SelectedTheme].Second.G * 255 + 3, OrionLib.Themes[OrionLib.SelectedTheme].Second.B * 255 + 3)}):Play()
-					-- Scale bounce back
-					TweenService:Create(ToggleFrame, TweenInfo.new(0.25, Enum.EasingStyle.Elastic, Enum.EasingDirection.Out), {
-						Size = UDim2.new(1, 0, 0, 38)
-					}):Play()
-					SaveCfg(game.GameId)
-					Toggle:Set(not Toggle.Value)
-				end)
-
-				AddConnection(Click.MouseButton1Down, function()
-					TweenService:Create(ToggleFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = Color3.fromRGB(OrionLib.Themes[OrionLib.SelectedTheme].Second.R * 255 + 6, OrionLib.Themes[OrionLib.SelectedTheme].Second.G * 255 + 6, OrionLib.Themes[OrionLib.SelectedTheme].Second.B * 255 + 6)}):Play()
-					-- Scale down press
-					TweenService:Create(ToggleFrame, TweenInfo.new(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-						Size = UDim2.new(1, -4, 0, 36)
-					}):Play()
-				end)
-
-				if ToggleConfig.Flag then
-					OrionLib.Flags[ToggleConfig.Flag] = Toggle
-				end	
-				return Toggle
-			end  
+	return Toggle
+end
+			
 			function ElementFunction:AddSlider(SliderConfig)
 				SliderConfig = SliderConfig or {}
 				SliderConfig.Name = SliderConfig.Name or "Slider"
