@@ -2601,7 +2601,6 @@ end)
 
 	-- âœ… SET FIXÃ‰
 	function Toggle:Set(Value)
-		if Toggle._busy then return end
 		Toggle.Value = Value
 
 		TweenService:Create(ToggleBox, TweenInfo.new(0.25), {
@@ -2628,9 +2627,8 @@ end)
 			Size = UDim2.new(1, 0, 0, 38)
 		}):Play()
 
-		SaveCfg(game.GameId)
-
 		Toggle:Set(not Toggle.Value)
+		SaveCfg(game.GameId)
 
 		task.delay(0.2, function()
 			Toggle._busy = false
