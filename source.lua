@@ -2125,7 +2125,11 @@ end)
 
 		-- Polling: on attend que des elements soient crees puis qu'il n'y ait plus de nouveau
 		while tick() - _loadStart < _maxLoadTime do
-			if _lastElementTime > 0 and (tick() - _loadStart) >= _minLoadTime then
+			if (tick() - _loadStart) >= _minLoadTime then
+				if _lastElementTime <= 0 then
+					break
+				end
+
 				-- Des elements ont ete crees et le minimum est atteint
 				-- Attendre qu'il n'y ait plus de nouvel element pendant 0.35s (idle)
 				local idleStart = tick()
@@ -3765,143 +3769,18 @@ function TabFunction:MakeTab(TabConfig)
 end
 
 -- ✅ TON CODE CONTINUE NORMALEMENT
-local Configs_HUB = {
-	Cor_Hub = Color3.fromRGB(15, 15, 15),
-	Cor_Options = Color3.fromRGB(15, 15, 15),
-	Cor_Stroke = Color3.fromRGB(60, 60, 60),
-	Cor_Text = Color3.fromRGB(240, 240, 240),
-	Cor_DarkText = Color3.fromRGB(140, 140, 140),
-	Corner_Radius = UDim.new(0, 4),
-	Text_Font = Enum.Font.FredokaOne
-}
-
-
-local function Stroke(parent, props)
-	local new = Create("UIStroke", parent)
-	new.Color = Configs_HUB.Cor_Stroke
-	new.ApplyStrokeMode = "Border"
-	if props then
-		SetProps(new, props)
-	end
-	return new
+return TabFunction
 end
-
-local function CreateTween(instance, prop, value, time, tweenWait)
-	local tween = TweenService:Create(instance,
-	TweenInfo.new(time, Enum.EasingStyle.Linear),
-	{[prop] = value})
-	tween:Play()
-	if tweenWait then
-		tween.Completed:Wait()
-	end
-end
-
-local ScreenGui = Create("ScreenGui", Orion)
-
-local Menu_Notifi = Create("Frame", ScreenGui, {
-	Size = UDim2.new(0, 300, 1, 0),
-	Position = UDim2.new(1, 0, 0, 0),
-	AnchorPoint = Vector2.new(1, 0),
-	BackgroundTransparency = 1
-})
-
-local Padding = Create("UIPadding", Menu_Notifi, {
-	PaddingLeft = UDim.new(0, 25),
-	PaddingTop = UDim.new(0, 25),
-	PaddingBottom = UDim.new(0, 50)
-})
-
-local ListLayout = Create("UIListLayout", Menu_Notifi, {
-	Padding = UDim.new(0, 15),
-	VerticalAlignment = "Bottom"
-})
 
 function OrionLib:MakeNotifi(Configs)
-	local Title = Configs.Title or "Title!"
-	local text = Configs.Text or "Notification content... what will it say??"
-	local timewait = Configs.Time or 5
-	
-	local Frame1 = Create("Frame", Menu_Notifi, {
-		Size = UDim2.new(2, 0, 0, 0),
-		BackgroundTransparency = 1,
-		AutomaticSize = "Y",
-		Name = "Title"
+	Configs = Configs or {}
+
+	return OrionLib:MakeNotification({
+		Name = Configs.Title or Configs.Name or "Notification",
+		Content = Configs.Text or Configs.Content or "Notification content...",
+		Time = Configs.Time or 5,
+		Image = Configs.Image or "rbxassetid://4384403532"
 	})
-	
-	local Frame2 = Create("Frame", Frame1, {
-		Size = UDim2.new(0, Menu_Notifi.Size.X.Offset - 50, 0, 0),
-		BackgroundColor3 = Configs_HUB.Cor_Hub,
-		Position = UDim2.new(0, Menu_Notifi.Size.X.Offset, 0, 0),
-		AutomaticSize = "Y"
-	})Corner(Frame2)
-	
-	local TextLabel = Create("TextLabel", Frame2, {
-		Size = UDim2.new(1, 0, 0, 25),
-		Font = Configs_HUB.Text_Font,
-		BackgroundTransparency = 1,
-		Text = Title,
-		TextSize = 20,
-		Position = UDim2.new(0, 20, 0, 5),
-		TextXAlignment = "Left",
-		TextColor3 = Configs_HUB.Cor_Text
-	})
-	
-	local TextButton = Create("TextButton", Frame2, {
-		Text = "X",
-		Font = Configs_HUB.Text_Font,
-		TextSize = 20,
-		BackgroundTransparency = 1,
-		TextColor3 = Color3.fromRGB(200, 200, 200),
-		Position = UDim2.new(1, -5, 0, 5),
-		AnchorPoint = Vector2.new(1, 0),
-		Size = UDim2.new(0, 25, 0, 25)
-	})
-	
-	local TextLabel = Create("TextLabel", Frame2, {
-		Size = UDim2.new(1, -30, 0, 0),
-		Position = UDim2.new(0, 20, 0, TextButton.Size.Y.Offset + 10),
-		TextSize = 15,
-		TextColor3 = Configs_HUB.Cor_DarkText,
-		TextXAlignment = "Left",
-		TextYAlignment = "Top",
-		AutomaticSize = "Y",
-		Text = text,
-		Font = Configs_HUB.Text_Font,
-		BackgroundTransparency = 1,
-		AutomaticSize = Enum.AutomaticSize.Y,
-		TextWrapped = true
-	})
-	
-	local FrameSize = Create("Frame", Frame2, {
-		Size = UDim2.new(1, 0, 0, 2),
-		BackgroundColor3 = Configs_HUB.Cor_Stroke,
-		Position = UDim2.new(0, 2, 0, 30),
-		BorderSizePixel = 0
-	})Corner(FrameSize)Create("Frame", Frame2, {
-		Size = UDim2.new(0, 0, 0, 5),
-		Position = UDim2.new(0, 0, 1, 5),
-		BackgroundTransparency = 1
-	})
-	
-	task.spawn(function()
-		CreateTween(FrameSize, "Size", UDim2.new(0, 0, 0, 2), timewait, true)
-	end)
-	
-	TextButton.MouseButton1Click:Connect(function()
-		CreateTween(Frame2, "Position", UDim2.new(0, -20, 0, 0), 0.1, true)
-		CreateTween(Frame2, "Position", UDim2.new(0, Menu_Notifi.Size.X.Offset, 0, 0), 0.5, true)
-		Frame1:Destroy()
-	end)
-	
-	task.spawn(function()
-		CreateTween(Frame2, "Position", UDim2.new(0, -20, 0, 0), 0.5, true)
-		CreateTween(Frame2, "Position", UDim2.new(), 0.1, true)task.wait(timewait)
-		if Frame2 then
-			CreateTween(Frame2, "Position", UDim2.new(0, -20, 0, 0), 0.1, true)
-			CreateTween(Frame2, "Position", UDim2.new(0, Menu_Notifi.Size.X.Offset, 0, 0), 0.5, true)
-			Frame1:Destroy()
-		end
-	end)
 end
 
 function OrionLib:Destroy()
