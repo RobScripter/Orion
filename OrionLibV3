@@ -612,8 +612,6 @@ function OrionLib:MakeWindow(WindowConfig)
 				sweep:Destroy()
 			end)
 
-			-- (no underline)
-			end)
 
 			task.wait(0.35)
 			frame.ClipsDescendants = origClips
