@@ -1680,7 +1680,7 @@ end)
 
 		task.spawn(function()
 			task.wait(1.2)
-			local subText = "v4.0 // PREMIUM EDITION"
+			local subText = "Orion Lib v4.0 // by RobScr"
 			for i = 1, #subText do
 				if not SubLabel or not SubLabel.Parent then break end
 				SubLabel.Text = string.sub(subText, 1, i)
@@ -2357,78 +2357,100 @@ function TabFunction:MakeTab(TabConfig)
 	-- CLICK TAB
 	AddConnection(TabFrame.MouseButton1Click, function()
 
-		-- hide all
-		for _, v in pairs(MainWindow:GetChildren()) do
-			if v.Name == "ItemContainer" then
-				v.Visible = false
+	-- hide all
+	for _, v in pairs(MainWindow:GetChildren()) do
+		if v and v.Name == "ItemContainer" then
+			v.Visible = false
+		end
+	end
+
+	-- reset tabs
+	for _, Tab in pairs(TabHolder:GetChildren()) do
+		if Tab and Tab:IsA("TextButton") then
+			if Tab:FindFirstChild("Ico") then
+				TweenService:Create(Tab.Ico, TweenInfo.new(0.25), {
+					ImageTransparency = 0.4
+				}):Play()
+			end
+			if Tab:FindFirstChild("Title") then
+				TweenService:Create(Tab.Title, TweenInfo.new(0.25), {
+					TextTransparency = 0.4
+				}):Play()
 			end
 		end
+	end
 
-		-- reset tabs
-		for _, Tab in pairs(TabHolder:GetChildren()) do
-			if Tab:IsA("TextButton") then
-				TweenService:Create(Tab.Ico, TweenInfo.new(0.25), {ImageTransparency = 0.4}):Play()
-				TweenService:Create(Tab.Title, TweenInfo.new(0.25), {TextTransparency = 0.4}):Play()
-			end
-		end
+	-- active tab
+	if TabFrame:FindFirstChild("Ico") then
+		TweenService:Create(TabFrame.Ico, TweenInfo.new(0.25), {
+			ImageTransparency = 0
+		}):Play()
+	end
 
-		-- active tab
-		TweenService:Create(TabFrame.Ico, TweenInfo.new(0.25), {ImageTransparency = 0}):Play()
-		TweenService:Create(TabFrame.Title, TweenInfo.new(0.25), {TextTransparency = 0}):Play()
+	if TabFrame:FindFirstChild("Title") then
+		TweenService:Create(TabFrame.Title, TweenInfo.new(0.25), {
+			TextTransparency = 0
+		}):Play()
+	end
 
+	if Container then
 		Container.Visible = true
+	end
+
+end)
+
+-- ⚠️ ANIMATION SAFE
+task.spawn(function()
+	if not Container then return end
+
+	local Items = {}
+
+	for _, Child in ipairs(Container:GetChildren()) do
+		if Child and (Child:IsA("Frame") or Child:IsA("TextButton")) then
+			table.insert(Items, Child)
+		end
+	end
+
+	table.sort(Items, function(a, b)
+		return (a.LayoutOrder or 0) < (b.LayoutOrder or 0)
 	end)
 
-	-- ⚠️ ANIMATION SAFE (NE CASSE PAS UIListLayout)
-	task.spawn(function()
-		if not Container then return end
+	-- hide
+	for _, Item in ipairs(Items) do
+		Item.BackgroundTransparency = 1
 
-		local Items = {}
-
-		for _, Child in ipairs(Container:GetChildren()) do
-			if Child:IsA("Frame") or Child:IsA("TextButton") then
-				table.insert(Items, Child)
+		for _, desc in ipairs(Item:GetDescendants()) do
+			if desc:IsA("TextLabel") then
+				desc.TextTransparency = 1
+			elseif desc:IsA("ImageLabel") or desc:IsA("ImageButton") then
+				desc.ImageTransparency = 1
 			end
 		end
+	end
 
-		table.sort(Items, function(a,b)
-			return (a.LayoutOrder or 0) < (b.LayoutOrder or 0)
-		end)
+	-- reveal
+	for _, Item in ipairs(Items) do
+		task.wait(0.04)
 
-		for _, Item in ipairs(Items) do
-			Item.BackgroundTransparency = 1
+		TweenService:Create(Item, TweenInfo.new(0.3), {
+			BackgroundTransparency = 0.7
+		}):Play()
 
-			for _, desc in ipairs(Item:GetDescendants()) do
-				if desc:IsA("TextLabel") then
-					desc.TextTransparency = 1
-				elseif desc:IsA("ImageLabel") or desc:IsA("ImageButton") then
-					desc.ImageTransparency = 1
-				end
+		for _, desc in ipairs(Item:GetDescendants()) do
+			if desc:IsA("TextLabel") then
+				TweenService:Create(desc, TweenInfo.new(0.3), {
+					TextTransparency = 0
+				}):Play()
+			elseif desc:IsA("ImageLabel") or desc:IsA("ImageButton") then
+				TweenService:Create(desc, TweenInfo.new(0.3), {
+					ImageTransparency = 0
+				}):Play()
 			end
 		end
+	end
+end)
 
-		for _, Item in ipairs(Items) do
-			task.wait(0.04)
-
-			TweenService:Create(Item, TweenInfo.new(0.3), {
-				BackgroundTransparency = 0.7
-			}):Play()
-
-			for _, desc in ipairs(Item:GetDescendants()) do
-				if desc:IsA("TextLabel") then
-					TweenService:Create(desc, TweenInfo.new(0.3), {
-						TextTransparency = 0
-					}):Play()
-				elseif desc:IsA("ImageLabel") or desc:IsA("ImageButton") then
-					TweenService:Create(desc, TweenInfo.new(0.3), {
-						ImageTransparency = 0
-					}):Play()
-				end
-			end
-		end
-	end)
-
-	return Elements
+return Elements
 end
 		local function GetElements(ItemParent)
 			local ElementFunction = {}
