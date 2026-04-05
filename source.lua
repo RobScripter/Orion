@@ -2438,12 +2438,23 @@ end
 task.spawn(function()
 	if not Container then return end
 
+	local Layout = Container:FindFirstChildOfClass("UIListLayout")
+	if Layout then
+		task.wait() -- laisse Roblox update l'ordre
+	end
+
 	local Items = {}
-	for _, Child in next, Container:GetChildren() do
+
+	for _, Child in ipairs(Container:GetChildren()) do
 		if Child and (Child:IsA("Frame") or Child:IsA("TextButton")) then
 			table.insert(Items, Child)
 		end
 	end
+
+	-- 🔥 TRI IMPORTANT (évite les items mélangés)
+	table.sort(Items, function(a, b)
+		return (a.LayoutOrder or 0) < (b.LayoutOrder or 0)
+	end)
 
 	-- cacher
 	for _, Item in next, Items do
