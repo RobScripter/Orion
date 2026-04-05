@@ -3972,4 +3972,5 @@ function OrionLib:Destroy()
 	Orion:Destroy()
 end
 
+print("Orion chargé")
 return OrionLib
