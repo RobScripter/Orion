@@ -2346,14 +2346,70 @@ end)
 			Container.Visible = true
 		end    
 
-		AddConnection(TabFrame.MouseButton1Click, function()
-			for _, Tab in next, TabHolder:GetChildren() do
-				if Tab:IsA("TextButton") then
-					Tab.Title.Font = Enum.Font.FredokaOne
-					TweenService:Create(Tab.Ico, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {ImageTransparency = 0.4}):Play()
-					TweenService:Create(Tab.Title, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {TextTransparency = 0.4}):Play()
-				end    
-			end
+local tabBusy = false
+
+AddConnection(TabFrame.MouseButton1Click, function()
+	if tabBusy then return end
+	tabBusy = true
+
+	-- 💥 Animation click (bounce)
+	local originalSize = TabFrame.Size
+	TweenService:Create(TabFrame, TweenInfo.new(0.08, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+		Size = UDim2.new(
+			originalSize.X.Scale, originalSize.X.Offset + 3,
+			originalSize.Y.Scale, originalSize.Y.Offset + 3
+		)
+	}):Play()
+
+	task.delay(0.08, function()
+		TweenService:Create(TabFrame, TweenInfo.new(0.2, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+			Size = originalSize
+		}):Play()
+	end)
+
+	-- ✨ Glow effet
+	task.spawn(function()
+		local glow = Instance.new("UIStroke")
+		glow.Color = Color3.fromRGB(100, 150, 255)
+		glow.Thickness = 2
+		glow.Transparency = 0.3
+		glow.Parent = TabFrame
+
+		TweenService:Create(glow, TweenInfo.new(0.3), {
+			Transparency = 1,
+			Thickness = 0
+		}):Play()
+
+		task.wait(0.3)
+		glow:Destroy()
+	end)
+
+	-- 🔥 Reset tous les tabs
+	for _, Tab in next, TabHolder:GetChildren() do
+		if Tab:IsA("TextButton") then
+			Tab.Title.Font = Enum.Font.FredokaOne
+			
+			-- Cancel anciens tweens (anti bug spam)
+			if Tab._icoTween then Tab._icoTween:Cancel() end
+			if Tab._textTween then Tab._textTween:Cancel() end
+
+			Tab._icoTween = TweenService:Create(Tab.Ico, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+				ImageTransparency = 0.4
+			})
+			Tab._textTween = TweenService:Create(Tab.Title, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+				TextTransparency = 0.4
+			})
+
+			Tab._icoTween:Play()
+			Tab._textTween:Play()
+		end    
+	end
+
+	-- 🔓 Débloque après animation
+	task.delay(0.25, function()
+		tabBusy = false
+	end)
+end)
 			for _, ItemContainer in next, MainWindow:GetChildren() do
 				if ItemContainer.Name == "ItemContainer" then
 					ItemContainer.Visible = false
@@ -2830,43 +2886,72 @@ end)
 				AnimateToggleIntro(ToggleBox)
 
 					AddConnection(Click.MouseEnter, function()
-					TweenService:Create(ToggleFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = Color3.fromRGB(OrionLib.Themes[OrionLib.SelectedTheme].Second.R * 255 + 3, OrionLib.Themes[OrionLib.SelectedTheme].Second.G * 255 + 3, OrionLib.Themes[OrionLib.SelectedTheme].Second.B * 255 + 3)}):Play()
-					-- Hover: checkbox subtle scale up
-					TweenService:Create(ToggleBox, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
-						Size = UDim2.new(0, 26, 0, 26)
-					}):Play()
-					-- Hover underline
-					task.spawn(function()
-						local hoverLine = Instance.new("Frame")
-						hoverLine.Name = "_toggleHoverLine"
-						hoverLine.Size = UDim2.new(0, 0, 0, 1)
-						hoverLine.Position = UDim2.new(0, 0, 1, -1)
-						hoverLine.BackgroundColor3 = Toggle.Value and ToggleConfig.Color or Color3.fromRGB(100, 150, 255)
-						hoverLine.BackgroundTransparency = 0.5
-						hoverLine.BorderSizePixel = 0
-						hoverLine.ZIndex = ToggleFrame.ZIndex + 3
-						hoverLine.Parent = ToggleFrame
-						TweenService:Create(hoverLine, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
-							Size = UDim2.new(1, 0, 0, 1)
-						}):Play()
-					end)
-				end)
+	-- 🔥 cancel ancien tween (optionnel mais propre)
+	if ToggleFrame._hoverTween then ToggleFrame._hoverTween:Cancel() end
+	if ToggleBox._sizeTween then ToggleBox._sizeTween:Cancel() end
 
-				AddConnection(Click.MouseLeave, function()
-					TweenService:Create(ToggleFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = OrionLib.Themes[OrionLib.SelectedTheme].Second}):Play()
-					-- Restore checkbox size
-					TweenService:Create(ToggleBox, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
-						Size = UDim2.new(0, 24, 0, 24)
-					}):Play()
-					-- Remove hover line
-					local hl = ToggleFrame:FindFirstChild("_toggleHoverLine")
-					if hl then
-						TweenService:Create(hl, TweenInfo.new(0.15, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
-							BackgroundTransparency = 1
-						}):Play()
-						task.spawn(function() task.wait(0.2) if hl.Parent then hl:Destroy() end end)
-					end
-				end)
+	-- 🎨 Background hover
+	ToggleFrame._hoverTween = TweenService:Create(
+		ToggleFrame,
+		TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out),
+		{
+			BackgroundColor3 = Color3.fromRGB(
+				OrionLib.Themes[OrionLib.SelectedTheme].Second.R * 255 + 3,
+				OrionLib.Themes[OrionLib.SelectedTheme].Second.G * 255 + 3,
+				OrionLib.Themes[OrionLib.SelectedTheme].Second.B * 255 + 3
+			)
+		}
+	)
+	ToggleFrame._hoverTween:Play()
+
+	-- 📦 Checkbox scale
+	ToggleBox._sizeTween = TweenService:Create(
+		ToggleBox,
+		TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out),
+		{
+			Size = UDim2.new(0, 26, 0, 26)
+		}
+	)
+	ToggleBox._sizeTween:Play()
+
+	-- ❌ Supprime ancienne ligne si existe
+	local old = ToggleFrame:FindFirstChild("_toggleHoverLine")
+	if old then old:Destroy() end
+
+	-- ✅ Crée UNE SEULE ligne
+	local hoverLine = Instance.new("Frame")
+	hoverLine.Name = "_toggleHoverLine"
+	hoverLine.Size = UDim2.new(0, 0, 0, 1)
+	hoverLine.Position = UDim2.new(0, 0, 1, -1)
+	hoverLine.BackgroundColor3 = Toggle.Value and ToggleConfig.Color or Color3.fromRGB(100, 150, 255)
+	hoverLine.BackgroundTransparency = 0.5
+	hoverLine.BorderSizePixel = 0
+	hoverLine.ZIndex = ToggleFrame.ZIndex + 3
+	hoverLine.Parent = ToggleFrame
+
+	TweenService:Create(hoverLine, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+		Size = UDim2.new(1, 0, 0, 1)
+	}):Play()
+end)
+			AddConnection(Click.MouseLeave, function()
+	-- reset size
+	TweenService:Create(ToggleBox, TweenInfo.new(0.2), {
+		Size = UDim2.new(0, 24, 0, 24)
+	}):Play()
+
+	-- remove line proprement
+	local line = ToggleFrame:FindFirstChild("_toggleHoverLine")
+	if line then
+		TweenService:Create(line, TweenInfo.new(0.2), {
+			Size = UDim2.new(0, 0, 0, 1),
+			BackgroundTransparency = 1
+		}):Play()
+
+		task.delay(0.2, function()
+			if line then line:Destroy() end
+		end)
+	end
+end)
 
 				AddConnection(Click.MouseButton1Up, function()
 					TweenService:Create(ToggleFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = Color3.fromRGB(OrionLib.Themes[OrionLib.SelectedTheme].Second.R * 255 + 3, OrionLib.Themes[OrionLib.SelectedTheme].Second.G * 255 + 3, OrionLib.Themes[OrionLib.SelectedTheme].Second.B * 255 + 3)}):Play()
