@@ -124,12 +124,25 @@ end
 
 local function Create(Name, Properties, Children)
 	local Object = Instance.new(Name)
-	for i, v in next, Properties or {} do
-		Object[i] = v
+
+	-- propriétés (safe)
+	if typeof(Properties) == "table" then
+		for i, v in pairs(Properties) do
+			pcall(function()
+				Object[i] = v
+			end)
+		end
 	end
-	for i, v in next, Children or {} do
-		v.Parent = Object
+
+	-- enfants (safe)
+	if typeof(Children) == "table" then
+		for _, v in ipairs(Children) do
+			if typeof(v) == "Instance" then
+				v.Parent = Object
+			end
+		end
 	end
+
 	return Object
 end
 
@@ -505,7 +518,7 @@ function OrionLib:MakeWindow(WindowConfig)
 		table.insert(hiddenDescs, {obj = desc, prop = "Transparency", orig = desc.Transparency})
 		desc.Transparency = 1
 	end
-end
+		end
 
 		task.spawn(function()
 			task.wait(delay)
@@ -1744,57 +1757,15 @@ end)
 		StatusLabel.ZIndex = 1005
 		StatusLabel.Parent = LoadOverlay
 
-		local statusMessages = {
-	{text = "Initializing core systems...", color = Color3.fromRGB(80, 80, 95)},
-	{text = "Checking if game is loaded...", color = Color3.fromRGB(80, 80, 95)},
-	{text = "Loading Orion library...", color = Color3.fromRGB(80, 80, 95)},
-	{text = "Applying anti-cheat bypass...", color = Color3.fromRGB(80, 80, 95)},
-	{text = "Starting script...", color = Color3.fromRGB(80, 80, 95)},
-	{text = "Verifying supported place...", color = Color3.fromRGB(80, 80, 95)},
-	{text = "Creating main window...", color = Color3.fromRGB(80, 80, 95)},
-	{text = "Loading base variables...", color = Color3.fromRGB(80, 80, 95)},
-	{text = "Preparing remote handlers...", color = Color3.fromRGB(80, 80, 95)},
-	{text = "Creating AntiVoid system...", color = Color3.fromRGB(80, 80, 95)},
-	{text = "Creating Slap Aura system...", color = Color3.fromRGB(80, 80, 95)},
-	{text = "Building tabs...", color = Color3.fromRGB(80, 80, 95)},
-
-	{text = "Creating Info tab...", color = Color3.fromRGB(80, 80, 95)},
-	{text = "Adding Info labels...", color = Color3.fromRGB(80, 80, 95)},
-	{text = "Adding Info buttons...", color = Color3.fromRGB(80, 80, 95)},
-	{text = "Adding Auto Set Info toggle...", color = Color3.fromRGB(80, 80, 95)},
-
-	{text = "Creating Main tab...", color = Color3.fromRGB(80, 80, 95)},
-	{text = "Adding Slap Aura toggle...", color = Color3.fromRGB(80, 80, 95)},
-	{text = "Adding Avoid Friends toggle...", color = Color3.fromRGB(80, 80, 95)},
-	{text = "Adding Auto Enter toggle...", color = Color3.fromRGB(80, 80, 95)},
-
-	{text = "Creating Anti tab...", color = Color3.fromRGB(80, 80, 95)},
-	{text = "Creating Badge tab...", color = Color3.fromRGB(80, 80, 95)},
-	{text = "Adding badge and glove buttons...", color = Color3.fromRGB(80, 80, 95)},
-
-	{text = "Creating Slap Farm tab...", color = Color3.fromRGB(80, 80, 95)},
-	{text = "Creating Teleports tab...", color = Color3.fromRGB(80, 80, 95)},
-	{text = "Adding teleport sections...", color = Color3.fromRGB(80, 80, 95)},
-	{text = "Adding teleport buttons...", color = Color3.fromRGB(80, 80, 95)},
-
-	{text = "Creating Settings tab...", color = Color3.fromRGB(80, 80, 95)},
-	{text = "Adding WalkSpeed controls...", color = Color3.fromRGB(80, 80, 95)},
-	{text = "Adding JumpPower controls...", color = Color3.fromRGB(80, 80, 95)},
-	{text = "Adding GUI destroy button...", color = Color3.fromRGB(80, 80, 95)},
-
-	{text = "Creating Credit tab...", color = Color3.fromRGB(80, 80, 95)},
-	{text = "Adding credits...", color = Color3.fromRGB(80, 80, 95)},
-
-	{text = "Loading extra modules...", color = Color3.fromRGB(80, 80, 95)},
-	{text = "Preparing combat tools...", color = Color3.fromRGB(80, 80, 95)},
-	{text = "Preparing anti tools...", color = Color3.fromRGB(80, 80, 95)},
-	{text = "Preparing item tools...", color = Color3.fromRGB(80, 80, 95)},
-	{text = "Preparing local tools...", color = Color3.fromRGB(80, 80, 95)},
-
-	{text = "Finalizing Orion setup...", color = Color3.fromRGB(80, 80, 95)},
-	{text = "Almost ready...", color = Color3.fromRGB(120, 120, 140)},
-	{text = "Orion loaded successfully.", color = Color3.fromRGB(80, 255, 120)},
-}
+			local statusMessages = {
+			{text = "Initializing core systems...", color = Color3.fromRGB(80, 80, 95)},
+			{text = "Loading UI modules...", color = Color3.fromRGB(80, 80, 95)},
+			{text = "Building interface layout...", color = Color3.fromRGB(80, 80, 95)},
+			{text = "Injecting theme engine...", color = Color3.fromRGB(80, 80, 95)},
+			{text = "Binding input handlers...", color = Color3.fromRGB(80, 80, 95)},
+			{text = "Finalizing boot sequence...", color = Color3.fromRGB(80, 80, 95)},
+			{text = "System ready.", color = Color3.fromRGB(80, 255, 120)},
+		}
 
 		-- Log lines qui s'accumulent au dessus du status
 		local logLines = {}
@@ -3589,7 +3560,6 @@ end
 				SectionFrame.Size = UDim2.new(1, 0, 0, SectionFrame.Holder.UIListLayout.AbsoluteContentSize.Y + 31)
 				SectionFrame.Holder.Size = UDim2.new(1, 0, 0, SectionFrame.Holder.UIListLayout.AbsoluteContentSize.Y)
 			end)
-
 			local SectionFunction = {}
 			for i, v in next, GetElements(SectionFrame.Holder) do
 				SectionFunction[i] = v 
@@ -3641,6 +3611,7 @@ end
 		return ElementFunction   
 	end
 
+local TabFunction = {}
 function TabFunction:MakeTab(TabConfig)
 	TabConfig = TabConfig or {}
 	TabConfig.Name = TabConfig.Name or "Tab"
@@ -3674,7 +3645,6 @@ function TabFunction:MakeTab(TabConfig)
 
 	AnimateTabIntro(TabFrame, FirstTab)
 
-	-- 📦 CONTAINER
 	local Container = AddThemeObject(SetChildren(SetProps(
 		MakeElement("ScrollFrame", Color3.fromRGB(255,255,255), 5),
 		{
@@ -3692,10 +3662,8 @@ function TabFunction:MakeTab(TabConfig)
 		Container.CanvasSize = UDim2.new(0,0,0,Container.UIListLayout.AbsoluteContentSize.Y + 30)
 	end)
 
-	-- 🔥 LIAISON CORRECTE
 	local Elements = GetElements(Container)
 
-	-- FIRST TAB
 	if FirstTab then
 		FirstTab = false
 		Container.Visible = true
@@ -3703,105 +3671,100 @@ function TabFunction:MakeTab(TabConfig)
 		TabFrame.Ico.ImageTransparency = 0
 	end
 
-	-- CLICK TAB
 	AddConnection(TabFrame.MouseButton1Click, function()
 
-	-- hide all
-	for _, v in pairs(MainWindow:GetChildren()) do
-		if v and v.Name == "ItemContainer" then
-			v.Visible = false
-		end
-	end
-
-	-- reset tabs
-	for _, Tab in pairs(TabHolder:GetChildren()) do
-		if Tab and Tab:IsA("TextButton") then
-			if Tab:FindFirstChild("Ico") then
-				TweenService:Create(Tab.Ico, TweenInfo.new(0.25), {
-					ImageTransparency = 0.4
-				}):Play()
-			end
-			if Tab:FindFirstChild("Title") then
-				TweenService:Create(Tab.Title, TweenInfo.new(0.25), {
-					TextTransparency = 0.4
-				}):Play()
+		for _, v in pairs(MainWindow:GetChildren()) do
+			if v and v.Name == "ItemContainer" then
+				v.Visible = false
 			end
 		end
-	end
 
-	-- active tab
-	if TabFrame:FindFirstChild("Ico") then
-		TweenService:Create(TabFrame.Ico, TweenInfo.new(0.25), {
-			ImageTransparency = 0
-		}):Play()
-	end
-
-	if TabFrame:FindFirstChild("Title") then
-		TweenService:Create(TabFrame.Title, TweenInfo.new(0.25), {
-			TextTransparency = 0
-		}):Play()
-	end
-
-	if Container then
-		Container.Visible = true
-	end
-
-end)
-
--- ⚠️ ANIMATION SAFE
-task.spawn(function()
-	if not Container then return end
-
-	local Items = {}
-
-	for _, Child in ipairs(Container:GetChildren()) do
-		if Child and (Child:IsA("Frame") or Child:IsA("TextButton")) then
-			table.insert(Items, Child)
+		for _, Tab in pairs(TabHolder:GetChildren()) do
+			if Tab and Tab:IsA("TextButton") then
+				if Tab:FindFirstChild("Ico") then
+					TweenService:Create(Tab.Ico, TweenInfo.new(0.25), {
+						ImageTransparency = 0.4
+					}):Play()
+				end
+				if Tab:FindFirstChild("Title") then
+					TweenService:Create(Tab.Title, TweenInfo.new(0.25), {
+						TextTransparency = 0.4
+					}):Play()
+				end
+			end
 		end
-	end
 
-	table.sort(Items, function(a, b)
-		return (a.LayoutOrder or 0) < (b.LayoutOrder or 0)
+		if TabFrame:FindFirstChild("Ico") then
+			TweenService:Create(TabFrame.Ico, TweenInfo.new(0.25), {
+				ImageTransparency = 0
+			}):Play()
+		end
+
+		if TabFrame:FindFirstChild("Title") then
+			TweenService:Create(TabFrame.Title, TweenInfo.new(0.25), {
+				TextTransparency = 0
+			}):Play()
+		end
+
+		if Container then
+			Container.Visible = true
+		end
+
 	end)
 
-	-- hide
-	for _, Item in ipairs(Items) do
-		Item.BackgroundTransparency = 1
+	task.spawn(function()
+		if not Container then return end
 
-		for _, desc in ipairs(Item:GetDescendants()) do
-			if desc:IsA("TextLabel") then
-				desc.TextTransparency = 1
-			elseif desc:IsA("ImageLabel") or desc:IsA("ImageButton") then
-				desc.ImageTransparency = 1
+		local Items = {}
+
+		for _, Child in ipairs(Container:GetChildren()) do
+			if Child and (Child:IsA("Frame") or Child:IsA("TextButton")) then
+				table.insert(Items, Child)
 			end
 		end
-	end
 
-	-- reveal
-	for _, Item in ipairs(Items) do
-		task.wait(0.04)
+		table.sort(Items, function(a, b)
+			return (a.LayoutOrder or 0) < (b.LayoutOrder or 0)
+		end)
 
-		TweenService:Create(Item, TweenInfo.new(0.3), {
-			BackgroundTransparency = 0.7
-		}):Play()
+		for _, Item in ipairs(Items) do
+			Item.BackgroundTransparency = 1
 
-		for _, desc in ipairs(Item:GetDescendants()) do
-			if desc:IsA("TextLabel") then
-				TweenService:Create(desc, TweenInfo.new(0.3), {
-					TextTransparency = 0
-				}):Play()
-			elseif desc:IsA("ImageLabel") or desc:IsA("ImageButton") then
-				TweenService:Create(desc, TweenInfo.new(0.3), {
-					ImageTransparency = 0
-				}):Play()
+			for _, desc in ipairs(Item:GetDescendants()) do
+				if desc:IsA("TextLabel") then
+					desc.TextTransparency = 1
+				elseif desc:IsA("ImageLabel") or desc:IsA("ImageButton") then
+					desc.ImageTransparency = 1
+				end
 			end
 		end
-	end
-end)
 
-return Elements
+		for _, Item in ipairs(Items) do
+			task.wait(0.04)
+
+			TweenService:Create(Item, TweenInfo.new(0.3), {
+				BackgroundTransparency = 0.7
+			}):Play()
+
+			for _, desc in ipairs(Item:GetDescendants()) do
+				if desc:IsA("TextLabel") then
+					TweenService:Create(desc, TweenInfo.new(0.3), {
+						TextTransparency = 0
+					}):Play()
+				elseif desc:IsA("ImageLabel") or desc:IsA("ImageButton") then
+					TweenService:Create(desc, TweenInfo.new(0.3), {
+						ImageTransparency = 0
+					}):Play()
+				end
+			end
+		end
+	end)
+
+	-- ✅ FIX IMPORTANT (manquait)
+	return Elements
 end
 
+-- ✅ TON CODE CONTINUE NORMALEMENT
 local Configs_HUB = {
 	Cor_Hub = Color3.fromRGB(15, 15, 15),
 	Cor_Options = Color3.fromRGB(15, 15, 15),
@@ -3812,35 +3775,6 @@ local Configs_HUB = {
 	Text_Font = Enum.Font.FredokaOne
 }
 
-local TweenService = game:GetService("TweenService")
-
-local function Create(instance, parent, props)
-	local new = Instance.new(instance, parent)
-	if props then
-		table.foreach(props, function(prop, value)
-			new[prop] = value
-		end)
-	end
-	return new
-end
-
-local function SetProps(instance, props)
-	if instance and props then
-		table.foreach(props, function(prop, value)
-			instance[prop] = value
-		end)
-	end
-	return instance
-end
-
-local function Corner(parent, props)
-	local new = Create("UICorner", parent)
-	new.CornerRadius = Configs_HUB.Corner_Radius
-	if props then
-		SetProps(new, props)
-	end
-	return new
-end
 
 local function Stroke(parent, props)
 	local new = Create("UIStroke", parent)
