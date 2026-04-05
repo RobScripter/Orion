@@ -583,24 +583,42 @@ end
 
 			-- Phase 5: Underline glow
 			task.spawn(function()
-				local underline = Instance.new("Frame")
-				underline.Size = UDim2.new(0, 0, 0, 1)
-				underline.Position = UDim2.new(0, 0, 1, -1)
-				underline.BackgroundColor3 = Color3.fromRGB(100, 150, 255)
-				underline.BackgroundTransparency = 0.5
-				underline.BorderSizePixel = 0
-				underline.ZIndex = frame.ZIndex + 5
-				underline.Parent = frame
-				TweenService:Create(underline, TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
-					Size = UDim2.new(1, 0, 0, 1)
-				}):Play()
-				task.wait(0.3)
-				TweenService:Create(underline, TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
-					BackgroundTransparency = 1
-				}):Play()
-				task.wait(0.35)
-				underline:Destroy()
-			end)
+	-- 🔥 Supprime une éventuelle ancienne barre
+	local existing = frame:FindFirstChild("Underline")
+	if existing then
+		existing:Destroy()
+	end
+
+	-- ✅ Crée UNE seule underline
+	local underline = Instance.new("Frame")
+	underline.Name = "Underline"
+	underline.Size = UDim2.new(0, 0, 0, 1)
+	underline.Position = UDim2.new(0, 0, 1, -1)
+	underline.BackgroundColor3 = Color3.fromRGB(100, 150, 255)
+	underline.BackgroundTransparency = 0.5
+	underline.BorderSizePixel = 0
+	underline.ZIndex = frame.ZIndex + 5
+	underline.Parent = frame
+
+	-- Animation apparition
+	TweenService:Create(underline, TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+		Size = UDim2.new(1, 0, 0, 1)
+	}):Play()
+
+	task.wait(0.3)
+
+	-- Animation disparition
+	TweenService:Create(underline, TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+		BackgroundTransparency = 1
+	}):Play()
+
+	task.wait(0.35)
+
+	-- 🔥 Vérifie avant de destroy (anti bug)
+	if underline and underline.Parent then
+		underline:Destroy()
+	end
+end)
 
 			task.wait(0.35)
 			frame.ClipsDescendants = origClips
