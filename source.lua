@@ -3734,10 +3734,7 @@ end
 			})
 		end
 		return ElementFunction   
-	end  
-	
-	return TabFunction
-end   
+	end
 
 local Configs_HUB = {
   Cor_Hub = Color3.fromRGB(15, 15, 15),
