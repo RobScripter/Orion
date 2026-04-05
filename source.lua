@@ -2325,26 +2325,28 @@ end)
 		AnimateTabIntro(TabFrame, FirstTab)
 
 		local Container = AddThemeObject(SetChildren(SetProps(MakeElement("ScrollFrame", Color3.fromRGB(255, 255, 255), 5), {
-			Size = UDim2.new(1, -150, 1, -50),
-			Position = UDim2.new(0, 150, 0, 50),
-			Parent = MainWindow,
-			Visible = false,
-			Name = "ItemContainer"
-		}), {
-			MakeElement("List", 0, 6),
-			MakeElement("Padding", 15, 10, 10, 15)
-		}), "Divider")
+	Size = UDim2.new(1, -150, 1, -50),
+	Position = UDim2.new(0, 150, 0, 50),
+	Parent = MainWindow,
+	Visible = false,
+	Name = "ItemContainer"
+}), {
+	MakeElement("List", 0, 6),
+	MakeElement("Padding", 15, 10, 10, 15)
+}), "Divider")
 
-		AddConnection(Container.UIListLayout:GetPropertyChangedSignal("AbsoluteContentSize"), function()
-			Container.CanvasSize = UDim2.new(0, 0, 0, Container.UIListLayout.AbsoluteContentSize.Y + 30)
-		end)
+AddConnection(Container.UIListLayout:GetPropertyChangedSignal("AbsoluteContentSize"), function()
+	Container.CanvasSize = UDim2.new(0, 0, 0, Container.UIListLayout.AbsoluteContentSize.Y + 30)
+end)
 
-		if FirstTab then
-			FirstTab = false
-			-- Les transparences sont gerees par AnimateTabIntro
-			TabFrame.Title.Font = Enum.Font.FredokaOne
-			Container.Visible = true
-		end    
+-- 🔥 AJOUTE ÇA (FIX PRINCIPAL)
+local Elements = GetElements(Container)
+
+if FirstTab then
+	FirstTab = false
+	TabFrame.Title.Font = Enum.Font.FredokaOne
+	Container.Visible = true
+end
 
 local tabBusy = false
 
