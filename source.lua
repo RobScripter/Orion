@@ -27,24 +27,24 @@ local OrionLib = {
 
 local Icons = {}
 local Success, Response = pcall(function()
-    return HttpService:JSONDecode(game:HttpGetAsync("https://raw.githubusercontent.com/frappedevs/lucideblox/master/src/modules/util/icons.json")).icons
+		return HttpService:JSONDecode(game:HttpGetAsync("https://raw.githubusercontent.com/frappedevs/lucideblox/master/src/modules/util/icons.json")).icons
 end)
 
 if Success then
-    Icons = Response
+		Icons = Response
 else
-    warn("\nOrion Library - Failed to load Feather Icons. Error code: " .. Response .. "\n")
+		warn("\nOrion Library - Failed to load Feather Icons. Error code: " .. Response .. "\n")
 end
 
 local function GetIcon(IconName)
-    return Icons[IconName] or nil
+		return Icons[IconName] or nil
 end
 
 local testIcon = GetIcon("check")
 if testIcon then
-    print("Icon found: " .. testIcon)
+		print("Icon found: " .. testIcon)
 else
-    print("Icon not found.")
+		print("Icon not found.")
 end
 
 
@@ -1081,7 +1081,7 @@ end)
 
 	MakeDraggable(DragPoint, MainWindow)
 
-    local MobileReopenButton = SetChildren(SetProps(MakeElement("Button"), {
+		local MobileReopenButton = SetChildren(SetProps(MakeElement("Button"), {
 		Parent = Orion,
 		Size = UDim2.new(0, 40, 0, 40),
 		Position = UDim2.new(0.5, -20, 0, 20),
@@ -1744,15 +1744,57 @@ end)
 		StatusLabel.ZIndex = 1005
 		StatusLabel.Parent = LoadOverlay
 
-			local statusMessages = {
-			{text = "Initializing core systems...", color = Color3.fromRGB(80, 80, 95)},
-			{text = "Loading UI modules...", color = Color3.fromRGB(80, 80, 95)},
-			{text = "Building interface layout...", color = Color3.fromRGB(80, 80, 95)},
-			{text = "Injecting theme engine...", color = Color3.fromRGB(80, 80, 95)},
-			{text = "Binding input handlers...", color = Color3.fromRGB(80, 80, 95)},
-			{text = "Finalizing boot sequence...", color = Color3.fromRGB(80, 80, 95)},
-			{text = "System ready.", color = Color3.fromRGB(80, 255, 120)},
-		}
+		local statusMessages = {
+	{text = "Initializing core systems...", color = Color3.fromRGB(80, 80, 95)},
+	{text = "Checking if game is loaded...", color = Color3.fromRGB(80, 80, 95)},
+	{text = "Loading Orion library...", color = Color3.fromRGB(80, 80, 95)},
+	{text = "Applying anti-cheat bypass...", color = Color3.fromRGB(80, 80, 95)},
+	{text = "Starting script...", color = Color3.fromRGB(80, 80, 95)},
+	{text = "Verifying supported place...", color = Color3.fromRGB(80, 80, 95)},
+	{text = "Creating main window...", color = Color3.fromRGB(80, 80, 95)},
+	{text = "Loading base variables...", color = Color3.fromRGB(80, 80, 95)},
+	{text = "Preparing remote handlers...", color = Color3.fromRGB(80, 80, 95)},
+	{text = "Creating AntiVoid system...", color = Color3.fromRGB(80, 80, 95)},
+	{text = "Creating Slap Aura system...", color = Color3.fromRGB(80, 80, 95)},
+	{text = "Building tabs...", color = Color3.fromRGB(80, 80, 95)},
+
+	{text = "Creating Info tab...", color = Color3.fromRGB(80, 80, 95)},
+	{text = "Adding Info labels...", color = Color3.fromRGB(80, 80, 95)},
+	{text = "Adding Info buttons...", color = Color3.fromRGB(80, 80, 95)},
+	{text = "Adding Auto Set Info toggle...", color = Color3.fromRGB(80, 80, 95)},
+
+	{text = "Creating Main tab...", color = Color3.fromRGB(80, 80, 95)},
+	{text = "Adding Slap Aura toggle...", color = Color3.fromRGB(80, 80, 95)},
+	{text = "Adding Avoid Friends toggle...", color = Color3.fromRGB(80, 80, 95)},
+	{text = "Adding Auto Enter toggle...", color = Color3.fromRGB(80, 80, 95)},
+
+	{text = "Creating Anti tab...", color = Color3.fromRGB(80, 80, 95)},
+	{text = "Creating Badge tab...", color = Color3.fromRGB(80, 80, 95)},
+	{text = "Adding badge and glove buttons...", color = Color3.fromRGB(80, 80, 95)},
+
+	{text = "Creating Slap Farm tab...", color = Color3.fromRGB(80, 80, 95)},
+	{text = "Creating Teleports tab...", color = Color3.fromRGB(80, 80, 95)},
+	{text = "Adding teleport sections...", color = Color3.fromRGB(80, 80, 95)},
+	{text = "Adding teleport buttons...", color = Color3.fromRGB(80, 80, 95)},
+
+	{text = "Creating Settings tab...", color = Color3.fromRGB(80, 80, 95)},
+	{text = "Adding WalkSpeed controls...", color = Color3.fromRGB(80, 80, 95)},
+	{text = "Adding JumpPower controls...", color = Color3.fromRGB(80, 80, 95)},
+	{text = "Adding GUI destroy button...", color = Color3.fromRGB(80, 80, 95)},
+
+	{text = "Creating Credit tab...", color = Color3.fromRGB(80, 80, 95)},
+	{text = "Adding credits...", color = Color3.fromRGB(80, 80, 95)},
+
+	{text = "Loading extra modules...", color = Color3.fromRGB(80, 80, 95)},
+	{text = "Preparing combat tools...", color = Color3.fromRGB(80, 80, 95)},
+	{text = "Preparing anti tools...", color = Color3.fromRGB(80, 80, 95)},
+	{text = "Preparing item tools...", color = Color3.fromRGB(80, 80, 95)},
+	{text = "Preparing local tools...", color = Color3.fromRGB(80, 80, 95)},
+
+	{text = "Finalizing Orion setup...", color = Color3.fromRGB(80, 80, 95)},
+	{text = "Almost ready...", color = Color3.fromRGB(120, 120, 140)},
+	{text = "Orion loaded successfully.", color = Color3.fromRGB(80, 255, 120)},
+}
 
 		-- Log lines qui s'accumulent au dessus du status
 		local logLines = {}
@@ -2292,166 +2334,7 @@ end)
 
 		local TabFunction = {}
 
-function TabFunction:MakeTab(TabConfig)
-	TabConfig = TabConfig or {}
-	TabConfig.Name = TabConfig.Name or "Tab"
-	TabConfig.Icon = TabConfig.Icon or ""
-	TabConfig.PremiumOnly = TabConfig.PremiumOnly or false
 
-	local TabFrame = SetChildren(SetProps(MakeElement("Button"), {
-		Size = UDim2.new(1, 0, 0, 30),
-		Parent = TabHolder
-	}), {
-		AddThemeObject(SetProps(MakeElement("Image", TabConfig.Icon), {
-			AnchorPoint = Vector2.new(0, 0.5),
-			Size = UDim2.new(0, 18, 0, 18),
-			Position = UDim2.new(0, 10, 0.5, 0),
-			ImageTransparency = 0.4,
-			Name = "Ico"
-		}), "Text"),
-
-		AddThemeObject(SetProps(MakeElement("Label", TabConfig.Name, 14), {
-			Size = UDim2.new(1, -35, 1, 0),
-			Position = UDim2.new(0, 35, 0, 0),
-			Font = Enum.Font.FredokaOne,
-			TextTransparency = 0.4,
-			Name = "Title"
-		}), "Text")
-	})
-
-	if GetIcon(TabConfig.Icon) then
-		TabFrame.Ico.Image = GetIcon(TabConfig.Icon)
-	end
-
-	AnimateTabIntro(TabFrame, FirstTab)
-
-	-- 📦 CONTAINER
-	local Container = AddThemeObject(SetChildren(SetProps(
-		MakeElement("ScrollFrame", Color3.fromRGB(255,255,255), 5),
-		{
-			Size = UDim2.new(1, -150, 1, -50),
-			Position = UDim2.new(0, 150, 0, 50),
-			Parent = MainWindow,
-			Visible = false,
-			Name = "ItemContainer"
-		}), {
-			MakeElement("List", 0, 6),
-			MakeElement("Padding", 15, 10, 10, 15)
-	}), "Divider")
-
-	AddConnection(Container.UIListLayout:GetPropertyChangedSignal("AbsoluteContentSize"), function()
-		Container.CanvasSize = UDim2.new(0,0,0,Container.UIListLayout.AbsoluteContentSize.Y + 30)
-	end)
-
-	-- 🔥 LIAISON CORRECTE
-	local Elements = GetElements(Container)
-
-	-- FIRST TAB
-	if FirstTab then
-		FirstTab = false
-		Container.Visible = true
-		TabFrame.Title.TextTransparency = 0
-		TabFrame.Ico.ImageTransparency = 0
-	end
-
-	-- CLICK TAB
-	AddConnection(TabFrame.MouseButton1Click, function()
-
-	-- hide all
-	for _, v in pairs(MainWindow:GetChildren()) do
-		if v and v.Name == "ItemContainer" then
-			v.Visible = false
-		end
-	end
-
-	-- reset tabs
-	for _, Tab in pairs(TabHolder:GetChildren()) do
-		if Tab and Tab:IsA("TextButton") then
-			if Tab:FindFirstChild("Ico") then
-				TweenService:Create(Tab.Ico, TweenInfo.new(0.25), {
-					ImageTransparency = 0.4
-				}):Play()
-			end
-			if Tab:FindFirstChild("Title") then
-				TweenService:Create(Tab.Title, TweenInfo.new(0.25), {
-					TextTransparency = 0.4
-				}):Play()
-			end
-		end
-	end
-
-	-- active tab
-	if TabFrame:FindFirstChild("Ico") then
-		TweenService:Create(TabFrame.Ico, TweenInfo.new(0.25), {
-			ImageTransparency = 0
-		}):Play()
-	end
-
-	if TabFrame:FindFirstChild("Title") then
-		TweenService:Create(TabFrame.Title, TweenInfo.new(0.25), {
-			TextTransparency = 0
-		}):Play()
-	end
-
-	if Container then
-		Container.Visible = true
-	end
-
-end)
-
--- ⚠️ ANIMATION SAFE
-task.spawn(function()
-	if not Container then return end
-
-	local Items = {}
-
-	for _, Child in ipairs(Container:GetChildren()) do
-		if Child and (Child:IsA("Frame") or Child:IsA("TextButton")) then
-			table.insert(Items, Child)
-		end
-	end
-
-	table.sort(Items, function(a, b)
-		return (a.LayoutOrder or 0) < (b.LayoutOrder or 0)
-	end)
-
-	-- hide
-	for _, Item in ipairs(Items) do
-		Item.BackgroundTransparency = 1
-
-		for _, desc in ipairs(Item:GetDescendants()) do
-			if desc:IsA("TextLabel") then
-				desc.TextTransparency = 1
-			elseif desc:IsA("ImageLabel") or desc:IsA("ImageButton") then
-				desc.ImageTransparency = 1
-			end
-		end
-	end
-
-	-- reveal
-	for _, Item in ipairs(Items) do
-		task.wait(0.04)
-
-		TweenService:Create(Item, TweenInfo.new(0.3), {
-			BackgroundTransparency = 0.7
-		}):Play()
-
-		for _, desc in ipairs(Item:GetDescendants()) do
-			if desc:IsA("TextLabel") then
-				TweenService:Create(desc, TweenInfo.new(0.3), {
-					TextTransparency = 0
-				}):Play()
-			elseif desc:IsA("ImageLabel") or desc:IsA("ImageButton") then
-				TweenService:Create(desc, TweenInfo.new(0.3), {
-					ImageTransparency = 0
-				}):Play()
-			end
-		end
-	end
-end)
-
-return Elements
-end
 		local function GetElements(ItemParent)
 			local ElementFunction = {}
 			function ElementFunction:AddLabel(Text)
@@ -3758,172 +3641,333 @@ end
 		return ElementFunction   
 	end
 
+function TabFunction:MakeTab(TabConfig)
+	TabConfig = TabConfig or {}
+	TabConfig.Name = TabConfig.Name or "Tab"
+	TabConfig.Icon = TabConfig.Icon or ""
+	TabConfig.PremiumOnly = TabConfig.PremiumOnly or false
+
+	local TabFrame = SetChildren(SetProps(MakeElement("Button"), {
+		Size = UDim2.new(1, 0, 0, 30),
+		Parent = TabHolder
+	}), {
+		AddThemeObject(SetProps(MakeElement("Image", TabConfig.Icon), {
+			AnchorPoint = Vector2.new(0, 0.5),
+			Size = UDim2.new(0, 18, 0, 18),
+			Position = UDim2.new(0, 10, 0.5, 0),
+			ImageTransparency = 0.4,
+			Name = "Ico"
+		}), "Text"),
+
+		AddThemeObject(SetProps(MakeElement("Label", TabConfig.Name, 14), {
+			Size = UDim2.new(1, -35, 1, 0),
+			Position = UDim2.new(0, 35, 0, 0),
+			Font = Enum.Font.FredokaOne,
+			TextTransparency = 0.4,
+			Name = "Title"
+		}), "Text")
+	})
+
+	if GetIcon(TabConfig.Icon) then
+		TabFrame.Ico.Image = GetIcon(TabConfig.Icon)
+	end
+
+	AnimateTabIntro(TabFrame, FirstTab)
+
+	-- 📦 CONTAINER
+	local Container = AddThemeObject(SetChildren(SetProps(
+		MakeElement("ScrollFrame", Color3.fromRGB(255,255,255), 5),
+		{
+			Size = UDim2.new(1, -150, 1, -50),
+			Position = UDim2.new(0, 150, 0, 50),
+			Parent = MainWindow,
+			Visible = false,
+			Name = "ItemContainer"
+		}), {
+			MakeElement("List", 0, 6),
+			MakeElement("Padding", 15, 10, 10, 15)
+	}), "Divider")
+
+	AddConnection(Container.UIListLayout:GetPropertyChangedSignal("AbsoluteContentSize"), function()
+		Container.CanvasSize = UDim2.new(0,0,0,Container.UIListLayout.AbsoluteContentSize.Y + 30)
+	end)
+
+	-- 🔥 LIAISON CORRECTE
+	local Elements = GetElements(Container)
+
+	-- FIRST TAB
+	if FirstTab then
+		FirstTab = false
+		Container.Visible = true
+		TabFrame.Title.TextTransparency = 0
+		TabFrame.Ico.ImageTransparency = 0
+	end
+
+	-- CLICK TAB
+	AddConnection(TabFrame.MouseButton1Click, function()
+
+	-- hide all
+	for _, v in pairs(MainWindow:GetChildren()) do
+		if v and v.Name == "ItemContainer" then
+			v.Visible = false
+		end
+	end
+
+	-- reset tabs
+	for _, Tab in pairs(TabHolder:GetChildren()) do
+		if Tab and Tab:IsA("TextButton") then
+			if Tab:FindFirstChild("Ico") then
+				TweenService:Create(Tab.Ico, TweenInfo.new(0.25), {
+					ImageTransparency = 0.4
+				}):Play()
+			end
+			if Tab:FindFirstChild("Title") then
+				TweenService:Create(Tab.Title, TweenInfo.new(0.25), {
+					TextTransparency = 0.4
+				}):Play()
+			end
+		end
+	end
+
+	-- active tab
+	if TabFrame:FindFirstChild("Ico") then
+		TweenService:Create(TabFrame.Ico, TweenInfo.new(0.25), {
+			ImageTransparency = 0
+		}):Play()
+	end
+
+	if TabFrame:FindFirstChild("Title") then
+		TweenService:Create(TabFrame.Title, TweenInfo.new(0.25), {
+			TextTransparency = 0
+		}):Play()
+	end
+
+	if Container then
+		Container.Visible = true
+	end
+
+end)
+
+-- ⚠️ ANIMATION SAFE
+task.spawn(function()
+	if not Container then return end
+
+	local Items = {}
+
+	for _, Child in ipairs(Container:GetChildren()) do
+		if Child and (Child:IsA("Frame") or Child:IsA("TextButton")) then
+			table.insert(Items, Child)
+		end
+	end
+
+	table.sort(Items, function(a, b)
+		return (a.LayoutOrder or 0) < (b.LayoutOrder or 0)
+	end)
+
+	-- hide
+	for _, Item in ipairs(Items) do
+		Item.BackgroundTransparency = 1
+
+		for _, desc in ipairs(Item:GetDescendants()) do
+			if desc:IsA("TextLabel") then
+				desc.TextTransparency = 1
+			elseif desc:IsA("ImageLabel") or desc:IsA("ImageButton") then
+				desc.ImageTransparency = 1
+			end
+		end
+	end
+
+	-- reveal
+	for _, Item in ipairs(Items) do
+		task.wait(0.04)
+
+		TweenService:Create(Item, TweenInfo.new(0.3), {
+			BackgroundTransparency = 0.7
+		}):Play()
+
+		for _, desc in ipairs(Item:GetDescendants()) do
+			if desc:IsA("TextLabel") then
+				TweenService:Create(desc, TweenInfo.new(0.3), {
+					TextTransparency = 0
+				}):Play()
+			elseif desc:IsA("ImageLabel") or desc:IsA("ImageButton") then
+				TweenService:Create(desc, TweenInfo.new(0.3), {
+					ImageTransparency = 0
+				}):Play()
+			end
+		end
+	end
+end)
+
+return Elements
+end
+
 local Configs_HUB = {
-  Cor_Hub = Color3.fromRGB(15, 15, 15),
-  Cor_Options = Color3.fromRGB(15, 15, 15),
-  Cor_Stroke = Color3.fromRGB(60, 60, 60),
-  Cor_Text = Color3.fromRGB(240, 240, 240),
-  Cor_DarkText = Color3.fromRGB(140, 140, 140),
-  Corner_Radius = UDim.new(0, 4),
-  Text_Font = Enum.Font.FredokaOne
+	Cor_Hub = Color3.fromRGB(15, 15, 15),
+	Cor_Options = Color3.fromRGB(15, 15, 15),
+	Cor_Stroke = Color3.fromRGB(60, 60, 60),
+	Cor_Text = Color3.fromRGB(240, 240, 240),
+	Cor_DarkText = Color3.fromRGB(140, 140, 140),
+	Corner_Radius = UDim.new(0, 4),
+	Text_Font = Enum.Font.FredokaOne
 }
 
 local TweenService = game:GetService("TweenService")
 
 local function Create(instance, parent, props)
-  local new = Instance.new(instance, parent)
-  if props then
-    table.foreach(props, function(prop, value)
-      new[prop] = value
-    end)
-  end
-  return new
+	local new = Instance.new(instance, parent)
+	if props then
+		table.foreach(props, function(prop, value)
+			new[prop] = value
+		end)
+	end
+	return new
 end
 
 local function SetProps(instance, props)
-  if instance and props then
-    table.foreach(props, function(prop, value)
-      instance[prop] = value
-    end)
-  end
-  return instance
+	if instance and props then
+		table.foreach(props, function(prop, value)
+			instance[prop] = value
+		end)
+	end
+	return instance
 end
 
 local function Corner(parent, props)
-  local new = Create("UICorner", parent)
-  new.CornerRadius = Configs_HUB.Corner_Radius
-  if props then
-    SetProps(new, props)
-  end
-  return new
+	local new = Create("UICorner", parent)
+	new.CornerRadius = Configs_HUB.Corner_Radius
+	if props then
+		SetProps(new, props)
+	end
+	return new
 end
 
 local function Stroke(parent, props)
-  local new = Create("UIStroke", parent)
-  new.Color = Configs_HUB.Cor_Stroke
-  new.ApplyStrokeMode = "Border"
-  if props then
-    SetProps(new, props)
-  end
-  return new
+	local new = Create("UIStroke", parent)
+	new.Color = Configs_HUB.Cor_Stroke
+	new.ApplyStrokeMode = "Border"
+	if props then
+		SetProps(new, props)
+	end
+	return new
 end
 
 local function CreateTween(instance, prop, value, time, tweenWait)
-  local tween = TweenService:Create(instance,
-  TweenInfo.new(time, Enum.EasingStyle.Linear),
-  {[prop] = value})
-  tween:Play()
-  if tweenWait then
-    tween.Completed:Wait()
-  end
+	local tween = TweenService:Create(instance,
+	TweenInfo.new(time, Enum.EasingStyle.Linear),
+	{[prop] = value})
+	tween:Play()
+	if tweenWait then
+		tween.Completed:Wait()
+	end
 end
 
 local ScreenGui = Create("ScreenGui", Orion)
 
 local Menu_Notifi = Create("Frame", ScreenGui, {
-  Size = UDim2.new(0, 300, 1, 0),
-  Position = UDim2.new(1, 0, 0, 0),
-  AnchorPoint = Vector2.new(1, 0),
-  BackgroundTransparency = 1
+	Size = UDim2.new(0, 300, 1, 0),
+	Position = UDim2.new(1, 0, 0, 0),
+	AnchorPoint = Vector2.new(1, 0),
+	BackgroundTransparency = 1
 })
 
 local Padding = Create("UIPadding", Menu_Notifi, {
-  PaddingLeft = UDim.new(0, 25),
-  PaddingTop = UDim.new(0, 25),
-  PaddingBottom = UDim.new(0, 50)
+	PaddingLeft = UDim.new(0, 25),
+	PaddingTop = UDim.new(0, 25),
+	PaddingBottom = UDim.new(0, 50)
 })
 
 local ListLayout = Create("UIListLayout", Menu_Notifi, {
-  Padding = UDim.new(0, 15),
-  VerticalAlignment = "Bottom"
+	Padding = UDim.new(0, 15),
+	VerticalAlignment = "Bottom"
 })
 
 function OrionLib:MakeNotifi(Configs)
-  local Title = Configs.Title or "Title!"
-  local text = Configs.Text or "Notification content... what will it say??"
-  local timewait = Configs.Time or 5
-  
-  local Frame1 = Create("Frame", Menu_Notifi, {
-    Size = UDim2.new(2, 0, 0, 0),
-    BackgroundTransparency = 1,
-    AutomaticSize = "Y",
-    Name = "Title"
-  })
-  
-  local Frame2 = Create("Frame", Frame1, {
-    Size = UDim2.new(0, Menu_Notifi.Size.X.Offset - 50, 0, 0),
-    BackgroundColor3 = Configs_HUB.Cor_Hub,
-    Position = UDim2.new(0, Menu_Notifi.Size.X.Offset, 0, 0),
-    AutomaticSize = "Y"
-  })Corner(Frame2)
-  
-  local TextLabel = Create("TextLabel", Frame2, {
-    Size = UDim2.new(1, 0, 0, 25),
-    Font = Configs_HUB.Text_Font,
-    BackgroundTransparency = 1,
-    Text = Title,
-    TextSize = 20,
-    Position = UDim2.new(0, 20, 0, 5),
-    TextXAlignment = "Left",
-    TextColor3 = Configs_HUB.Cor_Text
-  })
-  
-  local TextButton = Create("TextButton", Frame2, {
-    Text = "X",
-    Font = Configs_HUB.Text_Font,
-    TextSize = 20,
-    BackgroundTransparency = 1,
-    TextColor3 = Color3.fromRGB(200, 200, 200),
-    Position = UDim2.new(1, -5, 0, 5),
-    AnchorPoint = Vector2.new(1, 0),
-    Size = UDim2.new(0, 25, 0, 25)
-  })
-  
-  local TextLabel = Create("TextLabel", Frame2, {
-    Size = UDim2.new(1, -30, 0, 0),
-    Position = UDim2.new(0, 20, 0, TextButton.Size.Y.Offset + 10),
-    TextSize = 15,
-    TextColor3 = Configs_HUB.Cor_DarkText,
-    TextXAlignment = "Left",
-    TextYAlignment = "Top",
-    AutomaticSize = "Y",
-    Text = text,
-    Font = Configs_HUB.Text_Font,
-    BackgroundTransparency = 1,
-    AutomaticSize = Enum.AutomaticSize.Y,
-    TextWrapped = true
-  })
-  
-  local FrameSize = Create("Frame", Frame2, {
-    Size = UDim2.new(1, 0, 0, 2),
-    BackgroundColor3 = Configs_HUB.Cor_Stroke,
-    Position = UDim2.new(0, 2, 0, 30),
-    BorderSizePixel = 0
-  })Corner(FrameSize)Create("Frame", Frame2, {
-    Size = UDim2.new(0, 0, 0, 5),
-    Position = UDim2.new(0, 0, 1, 5),
-    BackgroundTransparency = 1
-  })
-  
-  task.spawn(function()
-    CreateTween(FrameSize, "Size", UDim2.new(0, 0, 0, 2), timewait, true)
-  end)
-  
-  TextButton.MouseButton1Click:Connect(function()
-    CreateTween(Frame2, "Position", UDim2.new(0, -20, 0, 0), 0.1, true)
-    CreateTween(Frame2, "Position", UDim2.new(0, Menu_Notifi.Size.X.Offset, 0, 0), 0.5, true)
-    Frame1:Destroy()
-  end)
-  
-  task.spawn(function()
-    CreateTween(Frame2, "Position", UDim2.new(0, -20, 0, 0), 0.5, true)
-    CreateTween(Frame2, "Position", UDim2.new(), 0.1, true)task.wait(timewait)
-    if Frame2 then
-      CreateTween(Frame2, "Position", UDim2.new(0, -20, 0, 0), 0.1, true)
-      CreateTween(Frame2, "Position", UDim2.new(0, Menu_Notifi.Size.X.Offset, 0, 0), 0.5, true)
-      Frame1:Destroy()
-    end
-  end)
+	local Title = Configs.Title or "Title!"
+	local text = Configs.Text or "Notification content... what will it say??"
+	local timewait = Configs.Time or 5
+	
+	local Frame1 = Create("Frame", Menu_Notifi, {
+		Size = UDim2.new(2, 0, 0, 0),
+		BackgroundTransparency = 1,
+		AutomaticSize = "Y",
+		Name = "Title"
+	})
+	
+	local Frame2 = Create("Frame", Frame1, {
+		Size = UDim2.new(0, Menu_Notifi.Size.X.Offset - 50, 0, 0),
+		BackgroundColor3 = Configs_HUB.Cor_Hub,
+		Position = UDim2.new(0, Menu_Notifi.Size.X.Offset, 0, 0),
+		AutomaticSize = "Y"
+	})Corner(Frame2)
+	
+	local TextLabel = Create("TextLabel", Frame2, {
+		Size = UDim2.new(1, 0, 0, 25),
+		Font = Configs_HUB.Text_Font,
+		BackgroundTransparency = 1,
+		Text = Title,
+		TextSize = 20,
+		Position = UDim2.new(0, 20, 0, 5),
+		TextXAlignment = "Left",
+		TextColor3 = Configs_HUB.Cor_Text
+	})
+	
+	local TextButton = Create("TextButton", Frame2, {
+		Text = "X",
+		Font = Configs_HUB.Text_Font,
+		TextSize = 20,
+		BackgroundTransparency = 1,
+		TextColor3 = Color3.fromRGB(200, 200, 200),
+		Position = UDim2.new(1, -5, 0, 5),
+		AnchorPoint = Vector2.new(1, 0),
+		Size = UDim2.new(0, 25, 0, 25)
+	})
+	
+	local TextLabel = Create("TextLabel", Frame2, {
+		Size = UDim2.new(1, -30, 0, 0),
+		Position = UDim2.new(0, 20, 0, TextButton.Size.Y.Offset + 10),
+		TextSize = 15,
+		TextColor3 = Configs_HUB.Cor_DarkText,
+		TextXAlignment = "Left",
+		TextYAlignment = "Top",
+		AutomaticSize = "Y",
+		Text = text,
+		Font = Configs_HUB.Text_Font,
+		BackgroundTransparency = 1,
+		AutomaticSize = Enum.AutomaticSize.Y,
+		TextWrapped = true
+	})
+	
+	local FrameSize = Create("Frame", Frame2, {
+		Size = UDim2.new(1, 0, 0, 2),
+		BackgroundColor3 = Configs_HUB.Cor_Stroke,
+		Position = UDim2.new(0, 2, 0, 30),
+		BorderSizePixel = 0
+	})Corner(FrameSize)Create("Frame", Frame2, {
+		Size = UDim2.new(0, 0, 0, 5),
+		Position = UDim2.new(0, 0, 1, 5),
+		BackgroundTransparency = 1
+	})
+	
+	task.spawn(function()
+		CreateTween(FrameSize, "Size", UDim2.new(0, 0, 0, 2), timewait, true)
+	end)
+	
+	TextButton.MouseButton1Click:Connect(function()
+		CreateTween(Frame2, "Position", UDim2.new(0, -20, 0, 0), 0.1, true)
+		CreateTween(Frame2, "Position", UDim2.new(0, Menu_Notifi.Size.X.Offset, 0, 0), 0.5, true)
+		Frame1:Destroy()
+	end)
+	
+	task.spawn(function()
+		CreateTween(Frame2, "Position", UDim2.new(0, -20, 0, 0), 0.5, true)
+		CreateTween(Frame2, "Position", UDim2.new(), 0.1, true)task.wait(timewait)
+		if Frame2 then
+			CreateTween(Frame2, "Position", UDim2.new(0, -20, 0, 0), 0.1, true)
+			CreateTween(Frame2, "Position", UDim2.new(0, Menu_Notifi.Size.X.Offset, 0, 0), 0.5, true)
+			Frame1:Destroy()
+		end
+	end)
 end
 
 function OrionLib:Destroy()
