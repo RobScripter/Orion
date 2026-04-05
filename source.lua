@@ -485,19 +485,27 @@ function OrionLib:MakeWindow(WindowConfig)
 
 		local hiddenDescs = {}
 		local textDescs = {}
-		for _, desc in next, frame:GetDescendants() do
-			if desc:IsA("TextLabel") or desc:IsA("TextBox") then
-				table.insert(hiddenDescs, {obj = desc, prop = "TextTransparency", orig = desc.TextTransparency})
-				table.insert(textDescs, {obj = desc, origText = desc.Text})
-				desc.TextTransparency = 1
-			elseif desc:IsA("ImageLabel") or desc:IsA("ImageButton") then
-				table.insert(hiddenDescs, {obj = desc, prop = "ImageTransparency", orig = desc.ImageTransparency})
-				desc.ImageTransparency = 1
-			elseif desc:IsA("UIStroke") then
-				table.insert(hiddenDescs, {obj = desc, prop = "Transparency", orig = desc.Transparency})
-				desc.Transparency = 1
-			end
+			for _, desc in next, frame:GetDescendants() do
+		if desc:IsA("TextLabel") or desc:IsA("TextBox") then
+		table.insert(hiddenDescs, {obj = desc, prop = "TextTransparency", orig = desc.TextTransparency})
+		
+		table.insert(textDescs, {obj = desc})
+		
+		if not desc:GetAttribute("RealText") then
+			desc:SetAttribute("RealText", desc.Text)
 		end
+		
+		desc.TextTransparency = 1
+
+	elseif desc:IsA("ImageLabel") or desc:IsA("ImageButton") then
+		table.insert(hiddenDescs, {obj = desc, prop = "ImageTransparency", orig = desc.ImageTransparency})
+		desc.ImageTransparency = 1
+
+	elseif desc:IsA("UIStroke") then
+		table.insert(hiddenDescs, {obj = desc, prop = "Transparency", orig = desc.Transparency})
+		desc.Transparency = 1
+	end
+end
 
 		task.spawn(function()
 			task.wait(delay)
@@ -547,8 +555,9 @@ function OrionLib:MakeWindow(WindowConfig)
 						task.wait(0.03)
 					end
 					for _, td in next, textDescs do
-						if td.obj and td.obj.Parent then
-							td.obj.Text = td.origText
+					if td.obj and td.obj.Parent then
+						local realText = td.obj:GetAttribute("RealText") or td.obj.Text
+						td.obj.Text = realText
 						end
 					end
 				end)
