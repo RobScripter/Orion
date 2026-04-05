@@ -2290,181 +2290,115 @@ end)
 		LoadSequence()
 	end	
 
-	local TabFunction = {}
-	function TabFunction:MakeTab(TabConfig)
-		TabConfig = TabConfig or {}
-		TabConfig.Name = TabConfig.Name or "Tab"
-		TabConfig.Icon = TabConfig.Icon or ""
-		TabConfig.PremiumOnly = TabConfig.PremiumOnly or false
+		local TabFunction = {}
 
-		local TabFrame = SetChildren(SetProps(MakeElement("Button"), {
-			Size = UDim2.new(1, 0, 0, 30),
-			Parent = TabHolder
+function TabFunction:MakeTab(TabConfig)
+	TabConfig = TabConfig or {}
+	TabConfig.Name = TabConfig.Name or "Tab"
+	TabConfig.Icon = TabConfig.Icon or ""
+	TabConfig.PremiumOnly = TabConfig.PremiumOnly or false
+
+	local TabFrame = SetChildren(SetProps(MakeElement("Button"), {
+		Size = UDim2.new(1, 0, 0, 30),
+		Parent = TabHolder
+	}), {
+		AddThemeObject(SetProps(MakeElement("Image", TabConfig.Icon), {
+			AnchorPoint = Vector2.new(0, 0.5),
+			Size = UDim2.new(0, 18, 0, 18),
+			Position = UDim2.new(0, 10, 0.5, 0),
+			ImageTransparency = 0.4,
+			Name = "Ico"
+		}), "Text"),
+
+		AddThemeObject(SetProps(MakeElement("Label", TabConfig.Name, 14), {
+			Size = UDim2.new(1, -35, 1, 0),
+			Position = UDim2.new(0, 35, 0, 0),
+			Font = Enum.Font.FredokaOne,
+			TextTransparency = 0.4,
+			Name = "Title"
+		}), "Text")
+	})
+
+	if GetIcon(TabConfig.Icon) then
+		TabFrame.Ico.Image = GetIcon(TabConfig.Icon)
+	end
+
+	AnimateTabIntro(TabFrame, FirstTab)
+
+	-- 📦 CONTAINER
+	local Container = AddThemeObject(SetChildren(SetProps(
+		MakeElement("ScrollFrame", Color3.fromRGB(255,255,255), 5),
+		{
+			Size = UDim2.new(1, -150, 1, -50),
+			Position = UDim2.new(0, 150, 0, 50),
+			Parent = MainWindow,
+			Visible = false,
+			Name = "ItemContainer"
 		}), {
-			AddThemeObject(SetProps(MakeElement("Image", TabConfig.Icon), {
-				AnchorPoint = Vector2.new(0, 0.5),
-				Size = UDim2.new(0, 18, 0, 18),
-				Position = UDim2.new(0, 10, 0.5, 0),
-				ImageTransparency = 0.4,
-				Name = "Ico"
-			}), "Text"),
-			AddThemeObject(SetProps(MakeElement("Label", TabConfig.Name, 14), {
-				Size = UDim2.new(1, -35, 1, 0),
-				Position = UDim2.new(0, 35, 0, 0),
-				Font = Enum.Font.FredokaOne,
-				TextTransparency = 0.4,
-				Name = "Title"
-			}), "Text")
-		})
+			MakeElement("List", 0, 6),
+			MakeElement("Padding", 15, 10, 10, 15)
+	}), "Divider")
 
-		if GetIcon(TabConfig.Icon) ~= nil then
-			TabFrame.Ico.Image = GetIcon(TabConfig.Icon)
-		end
-
-		-- Animation d'intro du tab dans la sidebar
-		AnimateTabIntro(TabFrame, FirstTab)
-
-		local Container = AddThemeObject(SetChildren(SetProps(MakeElement("ScrollFrame", Color3.fromRGB(255, 255, 255), 5), {
-	Size = UDim2.new(1, -150, 1, -50),
-	Position = UDim2.new(0, 150, 0, 50),
-	Parent = MainWindow,
-	Visible = false,
-	Name = "ItemContainer"
-}), {
-	MakeElement("List", 0, 6),
-	MakeElement("Padding", 15, 10, 10, 15)
-}), "Divider")
-
-AddConnection(Container.UIListLayout:GetPropertyChangedSignal("AbsoluteContentSize"), function()
-	Container.CanvasSize = UDim2.new(0, 0, 0, Container.UIListLayout.AbsoluteContentSize.Y + 30)
-end)
-
--- 🔥 AJOUTE ÇA (FIX PRINCIPAL)
-local Elements = GetElements(Container)
-
-if FirstTab then
-	FirstTab = false
-	TabFrame.Title.Font = Enum.Font.FredokaOne
-	Container.Visible = true
-end
-
-local tabBusy = false
-
-AddConnection(TabFrame.MouseButton1Click, function()
-	if tabBusy then return end
-	tabBusy = true
-
-	-- 💥 Animation click (bounce)
-	local originalSize = TabFrame.Size
-	TweenService:Create(TabFrame, TweenInfo.new(0.08, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-		Size = UDim2.new(
-			originalSize.X.Scale, originalSize.X.Offset + 3,
-			originalSize.Y.Scale, originalSize.Y.Offset + 3
-		)
-	}):Play()
-
-	task.delay(0.08, function()
-		TweenService:Create(TabFrame, TweenInfo.new(0.2, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-			Size = originalSize
-		}):Play()
+	AddConnection(Container.UIListLayout:GetPropertyChangedSignal("AbsoluteContentSize"), function()
+		Container.CanvasSize = UDim2.new(0,0,0,Container.UIListLayout.AbsoluteContentSize.Y + 30)
 	end)
 
-	-- ✨ Glow effet
+	-- 🔥 LIAISON CORRECTE
+	local Elements = GetElements(Container)
+
+	-- FIRST TAB
+	if FirstTab then
+		FirstTab = false
+		Container.Visible = true
+		TabFrame.Title.TextTransparency = 0
+		TabFrame.Ico.ImageTransparency = 0
+	end
+
+	-- CLICK TAB
+	AddConnection(TabFrame.MouseButton1Click, function()
+
+		-- hide all
+		for _, v in pairs(MainWindow:GetChildren()) do
+			if v.Name == "ItemContainer" then
+				v.Visible = false
+			end
+		end
+
+		-- reset tabs
+		for _, Tab in pairs(TabHolder:GetChildren()) do
+			if Tab:IsA("TextButton") then
+				TweenService:Create(Tab.Ico, TweenInfo.new(0.25), {ImageTransparency = 0.4}):Play()
+				TweenService:Create(Tab.Title, TweenInfo.new(0.25), {TextTransparency = 0.4}):Play()
+			end
+		end
+
+		-- active tab
+		TweenService:Create(TabFrame.Ico, TweenInfo.new(0.25), {ImageTransparency = 0}):Play()
+		TweenService:Create(TabFrame.Title, TweenInfo.new(0.25), {TextTransparency = 0}):Play()
+
+		Container.Visible = true
+	end)
+
+	-- ⚠️ ANIMATION SAFE (NE CASSE PAS UIListLayout)
 	task.spawn(function()
-		local glow = Instance.new("UIStroke")
-		glow.Color = Color3.fromRGB(100, 150, 255)
-		glow.Thickness = 2
-		glow.Transparency = 0.3
-		glow.Parent = TabFrame
+		if not Container then return end
 
-		TweenService:Create(glow, TweenInfo.new(0.3), {
-			Transparency = 1,
-			Thickness = 0
-		}):Play()
+		local Items = {}
 
-		task.wait(0.3)
-		glow:Destroy()
-	end)
-
-	-- 🔥 Reset tous les tabs
-	for _, Tab in next, TabHolder:GetChildren() do
-		if Tab:IsA("TextButton") then
-			Tab.Title.Font = Enum.Font.FredokaOne
-			
-			-- Cancel anciens tweens (anti bug spam)
-			if Tab._icoTween then Tab._icoTween:Cancel() end
-			if Tab._textTween then Tab._textTween:Cancel() end
-
-			Tab._icoTween = TweenService:Create(Tab.Ico, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
-				ImageTransparency = 0.4
-			})
-			Tab._textTween = TweenService:Create(Tab.Title, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
-				TextTransparency = 0.4
-			})
-
-			Tab._icoTween:Play()
-			Tab._textTween:Play()
-		end    
-	end
-
-	-- 🔓 Débloque après animation
-	task.delay(0.25, function()
-		tabBusy = false
-	end)
-end)
-for _, ItemContainer in next, MainWindow:GetChildren() do
-	if ItemContainer and ItemContainer.Name == "ItemContainer" then
-		ItemContainer.Visible = false
-	end    
-end  
-
--- 🔥 sécurise les éléments avant tween
-if TabFrame and TabFrame:FindFirstChild("Ico") then
-	TweenService:Create(TabFrame.Ico, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
-		ImageTransparency = 0
-	}):Play()
-end
-
-if TabFrame and TabFrame:FindFirstChild("Title") then
-	TweenService:Create(TabFrame.Title, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
-		TextTransparency = 0
-	}):Play()
-	TabFrame.Title.Font = Enum.Font.FredokaOne
-end
-
-if Container then
-	Container.Visible = true
-end
-
--- 🔥 Animation des éléments
-task.spawn(function()
-	if not Container then return end
-
-	local Layout = Container:FindFirstChildOfClass("UIListLayout")
-	if Layout then
-		task.wait() -- laisse Roblox update l'ordre
-	end
-
-	local Items = {}
-
-	for _, Child in ipairs(Container:GetChildren()) do
-		if Child and (Child:IsA("Frame") or Child:IsA("TextButton")) then
-			table.insert(Items, Child)
+		for _, Child in ipairs(Container:GetChildren()) do
+			if Child:IsA("Frame") or Child:IsA("TextButton") then
+				table.insert(Items, Child)
+			end
 		end
-	end
 
-	-- 🔥 TRI IMPORTANT (évite les items mélangés)
-	table.sort(Items, function(a, b)
-		return (a.LayoutOrder or 0) < (b.LayoutOrder or 0)
-	end)
+		table.sort(Items, function(a,b)
+			return (a.LayoutOrder or 0) < (b.LayoutOrder or 0)
+		end)
 
-	-- cacher
-	for _, Item in next, Items do
-		if Item then
-			Item.Position = UDim2.new(0, 25, Item.Position.Y.Scale, Item.Position.Y.Offset)
+		for _, Item in ipairs(Items) do
 			Item.BackgroundTransparency = 1
 
-			for _, desc in next, Item:GetDescendants() do
+			for _, desc in ipairs(Item:GetDescendants()) do
 				if desc:IsA("TextLabel") then
 					desc.TextTransparency = 1
 				elseif desc:IsA("ImageLabel") or desc:IsA("ImageButton") then
@@ -2472,54 +2406,30 @@ task.spawn(function()
 				end
 			end
 		end
-	end
 
-	-- reveal
-	for _, Item in next, Items do
-		if not Item then continue end
+		for _, Item in ipairs(Items) do
+			task.wait(0.04)
 
-		task.wait(0.045)
+			TweenService:Create(Item, TweenInfo.new(0.3), {
+				BackgroundTransparency = 0.7
+			}):Play()
 
-		TweenService:Create(Item, TweenInfo.new(0.35, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
-			Position = UDim2.new(0, 0, Item.Position.Y.Scale, Item.Position.Y.Offset),
-			BackgroundTransparency = 0.7
-		}):Play()
-
-		-- enfants
-		for _, desc in next, Item:GetDescendants() do
-			if desc:IsA("TextLabel") then
-				TweenService:Create(desc, TweenInfo.new(0.3), {
-					TextTransparency = desc.Name == "Content" and 0 or (desc.Name == "Value" and 0.8 or 0)
-				}):Play()
-			elseif desc:IsA("ImageLabel") or desc:IsA("ImageButton") then
-				TweenService:Create(desc, TweenInfo.new(0.3), {
-					ImageTransparency = 0
-				}):Play()
+			for _, desc in ipairs(Item:GetDescendants()) do
+				if desc:IsA("TextLabel") then
+					TweenService:Create(desc, TweenInfo.new(0.3), {
+						TextTransparency = 0
+					}):Play()
+				elseif desc:IsA("ImageLabel") or desc:IsA("ImageButton") then
+					TweenService:Create(desc, TweenInfo.new(0.3), {
+						ImageTransparency = 0
+					}):Play()
+				end
 			end
 		end
+	end)
 
-		-- 🔥 FIX SLIDER (ANTI NIL)
-		local sliderDrag = Item:FindFirstChild("Frame")
-		if sliderDrag then
-			local innerDrag = sliderDrag:FindFirstChildWhichIsA("Frame")
-
-			if innerDrag and innerDrag:IsA("Frame") and innerDrag.Name ~= "UICorner" then
-				local savedSize = innerDrag.Size
-				innerDrag.Size = UDim2.new(0, 0, 1, 0)
-
-				task.spawn(function()
-					task.wait(0.2)
-
-					if innerDrag and innerDrag.Parent then
-						TweenService:Create(innerDrag, TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
-							Size = savedSize
-						}):Play()
-					end
-				end)
-			end
-		end
-	end
-end)
+	return Elements
+end
 		local function GetElements(ItemParent)
 			local ElementFunction = {}
 			function ElementFunction:AddLabel(Text)
