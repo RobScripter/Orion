@@ -372,12 +372,13 @@ local NotificationHolder = SetProps(SetChildren(MakeElement("TFrame"), {
 		HorizontalAlignment = Enum.HorizontalAlignment.Center,
 		SortOrder = Enum.SortOrder.LayoutOrder,
 		VerticalAlignment = Enum.VerticalAlignment.Bottom,
-		Padding = UDim.new(0, 5)
+		Padding = UDim.new(0, 8)
 	})
 }), {
-	Position = UDim2.new(1, -25, 1, -25),
-	Size = UDim2.new(0, 300, 1, -25),
+	Position = UDim2.new(1, -15, 1, -15),
+	Size = UDim2.new(0, 300, 1, -15),
 	AnchorPoint = Vector2.new(1, 1),
+	ZIndex = 9999,
 	Parent = Orion
 })
 
@@ -395,14 +396,15 @@ function OrionLib:MakeNotification(NotificationConfig)
 		})
 
 		-- Commence hors ecran a droite
-		local NotificationFrame = SetChildren(SetProps(MakeElement("RoundFrame", Color3.fromRGB(25, 25, 25), 0, 10), {
+		local NotificationFrame = SetChildren(SetProps(MakeElement("RoundFrame", Color3.fromRGB(20, 20, 24), 0, 8), {
 			Parent = NotificationParent,
 			Size = UDim2.new(1, 0, 0, 0),
 			Position = UDim2.new(1, 20, 0, 0),
 			BackgroundTransparency = 1,
-			AutomaticSize = Enum.AutomaticSize.Y
+			AutomaticSize = Enum.AutomaticSize.Y,
+			ZIndex = 9999
 		}), {
-			MakeElement("Stroke", Color3.fromRGB(93, 93, 93), 1.2),
+			MakeElement("Stroke", Color3.fromRGB(55, 55, 65), 1),
 			MakeElement("Padding", 12, 12, 12, 12),
 			SetProps(MakeElement("Image", NotificationConfig.Image), {
 				Size = UDim2.new(0, 20, 0, 20),
@@ -610,25 +612,7 @@ function OrionLib:MakeWindow(WindowConfig)
 				sweep:Destroy()
 			end)
 
-			-- Phase 5: Underline glow
-			task.spawn(function()
-				local underline = Instance.new("Frame")
-				underline.Size = UDim2.new(0, 0, 0, 1)
-				underline.Position = UDim2.new(0, 0, 1, -1)
-				underline.BackgroundColor3 = Color3.fromRGB(100, 150, 255)
-				underline.BackgroundTransparency = 0.5
-				underline.BorderSizePixel = 0
-				underline.ZIndex = frame.ZIndex + 5
-				underline.Parent = frame
-				TweenService:Create(underline, TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
-					Size = UDim2.new(1, 0, 0, 1)
-				}):Play()
-				task.wait(0.3)
-				TweenService:Create(underline, TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
-					BackgroundTransparency = 1
-				}):Play()
-				task.wait(0.35)
-				underline:Destroy()
+			-- (no underline)
 			end)
 
 			task.wait(0.35)
@@ -2359,22 +2343,67 @@ task.wait(0.25)
 		end    
 
 		AddConnection(TabFrame.MouseButton1Click, function()
+			-- Deselect tous les tabs
 			for _, Tab in next, TabHolder:GetChildren() do
 				if Tab:IsA("TextButton") then
 					Tab.Title.Font = Enum.Font.FredokaOne
-					TweenService:Create(Tab.Ico, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {ImageTransparency = 0.4}):Play()
-					TweenService:Create(Tab.Title, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {TextTransparency = 0.4}):Play()
-				end    
+					TweenService:Create(Tab.Ico, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {ImageTransparency = 0.5}):Play()
+					TweenService:Create(Tab.Title, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {TextTransparency = 0.5}):Play()
+					-- Enlever accent bar actif
+					local bar = Tab:FindFirstChild("ActiveBar")
+					if bar then
+						TweenService:Create(bar, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundTransparency = 1, Size = UDim2.new(0, 2, 0, 0)}):Play()
+						task.delay(0.25, function() if bar and bar.Parent then bar:Destroy() end end)
+					end
+				end
 			end
+
+			-- Cacher ancien container avec slide out
 			for _, ItemContainer in next, MainWindow:GetChildren() do
-				if ItemContainer.Name == "ItemContainer" then
-					ItemContainer.Visible = false
-				end    
-			end  
-			TweenService:Create(TabFrame.Ico, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {ImageTransparency = 0}):Play()
+				if ItemContainer.Name == "ItemContainer" and ItemContainer.Visible then
+					local ic = ItemContainer
+					task.spawn(function()
+						TweenService:Create(ic, TweenInfo.new(0.18, Enum.EasingStyle.Quint, Enum.EasingDirection.In), {
+							Position = UDim2.new(0, -18, 0, 50)
+						}):Play()
+						task.wait(0.18)
+						ic.Visible = false
+						ic.Position = UDim2.new(0, 150, 0, 50)
+					end)
+				end
+			end
+
+			task.wait(0.12)
+
+			-- Select tab actif
+			TweenService:Create(TabFrame.Ico, TweenInfo.new(0.25, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {ImageTransparency = 0, Size = UDim2.new(0, 20, 0, 20)}):Play()
+			task.delay(0.15, function()
+				TweenService:Create(TabFrame.Ico, TweenInfo.new(0.15, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Size = UDim2.new(0, 18, 0, 18)}):Play()
+			end)
 			TweenService:Create(TabFrame.Title, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {TextTransparency = 0}):Play()
 			TabFrame.Title.Font = Enum.Font.FredokaOne
+
+			-- Accent bar sur tab actif
+			local activeBar = Instance.new("Frame")
+			activeBar.Name = "ActiveBar"
+			activeBar.Size = UDim2.new(0, 2, 0, 0)
+			activeBar.Position = UDim2.new(0, 0, 0.1, 0)
+			activeBar.BackgroundColor3 = Color3.fromRGB(80, 140, 255)
+			activeBar.BackgroundTransparency = 0.2
+			activeBar.BorderSizePixel = 0
+			activeBar.ZIndex = TabFrame.ZIndex + 2
+			activeBar.Parent = TabFrame
+			Instance.new("UICorner", activeBar).CornerRadius = UDim.new(1, 0)
+			TweenService:Create(activeBar, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+				Size = UDim2.new(0, 2, 0.8, 0)
+			}):Play()
+
+			-- Slide in nouveau container
+			Container.Position = UDim2.new(0, 20, 0, 50)
 			Container.Visible = true
+			TweenService:Create(Container, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+				Position = UDim2.new(0, 150, 0, 50)
+			}):Play()
 
 				-- Animation: les elements apparaissent l'un apres l'autre avec slide + fade
 				task.spawn(function()
@@ -2683,7 +2712,9 @@ task.wait(0.25)
 				ToggleConfig.Flag = ToggleConfig.Flag or nil
 				ToggleConfig.Save = ToggleConfig.Save or false
 
-				local Toggle = {Value = ToggleConfig.Default, Save = ToggleConfig.Save}
+				ToggleConfig.ToggleAll = ToggleConfig.ToggleAll or false
+
+				local Toggle = {Value = ToggleConfig.Default, Save = ToggleConfig.Save, Type = "Toggle"}
 
 				local Click = SetProps(MakeElement("Button"), {
 					Size = UDim2.new(1, 0, 1, 0)
@@ -2833,6 +2864,24 @@ task.wait(0.25)
 						end
 					end)
 					ToggleConfig.Callback(Toggle.Value)
+
+					-- ToggleAll: active/désactive tous les autres toggles du même container
+					if ToggleConfig.ToggleAll then
+						for _, child in next, ItemParent:GetChildren() do
+							local otherClick = child:FindFirstChild("TextButton") or (child:IsA("TextButton") and child)
+							if otherClick and otherClick ~= Click and child ~= ToggleFrame then
+								-- Cherche un Toggle dans OrionLib.Flags
+								for _, flag in pairs(OrionLib.Flags) do
+									if flag.Type == "Toggle" then
+										task.spawn(function()
+											task.wait(0.05)
+											flag:Set(Toggle.Value)
+										end)
+									end
+								end
+							end
+						end
+					end
 				end    
 
 				Toggle:Set(Toggle.Value)
@@ -3781,48 +3830,70 @@ task.wait(0.25)
 		function ElementFunction:AddSection(SectionConfig)
 			SectionConfig.Name = SectionConfig.Name or "Section"
 
-			local SectionLabel = AddThemeObject(SetProps(MakeElement("Label", SectionConfig.Name, 14), {
-				Size = UDim2.new(1, -12, 0, 16),
-				Position = UDim2.new(0, -20, 0, 3),
+			-- Label du titre
+			local SectionLabel = AddThemeObject(SetProps(MakeElement("Label", SectionConfig.Name, 11), {
+				Size = UDim2.new(1, -12, 0, 14),
+				Position = UDim2.new(0, -15, 0, 0),
 				Font = Enum.Font.FredokaOne,
-				TextTransparency = 1
+				TextTransparency = 1,
+				TextXAlignment = Enum.TextXAlignment.Left
 			}), "TextDark")
 
+			-- Ligne gauche colorée
+			local SectionAccent = Instance.new("Frame")
+			SectionAccent.Size = UDim2.new(0, 2, 0, 0)
+			SectionAccent.Position = UDim2.new(0, -6, 0, 1)
+			SectionAccent.BackgroundColor3 = Color3.fromRGB(60, 100, 200)
+			SectionAccent.BackgroundTransparency = 0
+			SectionAccent.BorderSizePixel = 0
+			Instance.new("UICorner", SectionAccent).CornerRadius = UDim.new(1, 0)
+
+			-- Ligne horizontale
 			local SectionLine = Instance.new("Frame")
 			SectionLine.Size = UDim2.new(0, 0, 0, 1)
-			SectionLine.Position = UDim2.new(0, 0, 0, 20)
-			SectionLine.BackgroundColor3 = Color3.fromRGB(38, 38, 38)
+			SectionLine.Position = UDim2.new(0, 0, 1, -1)
+			SectionLine.BackgroundColor3 = Color3.fromRGB(35, 35, 42)
 			SectionLine.BorderSizePixel = 0
 
 			local SectionFrame = SetChildren(SetProps(MakeElement("TFrame"), {
-				Size = UDim2.new(1, 0, 0, 26),
-				Parent = Container
+				Size = UDim2.new(1, 0, 0, 22),
+				Parent = Container,
+				ClipsDescendants = false
 			}), {
 				SectionLabel,
+				SectionAccent,
 				SectionLine,
 				SetChildren(SetProps(MakeElement("TFrame"), {
 					AnchorPoint = Vector2.new(0, 0),
-					Size = UDim2.new(1, 0, 1, -24),
-					Position = UDim2.new(0, 0, 0, 23),
+					Size = UDim2.new(1, 0, 1, -20),
+					Position = UDim2.new(0, 0, 0, 20),
 					Name = "Holder"
 				}), {
 					MakeElement("List", 0, 6)
 				}),
 			})
 
+			-- Animation: accent grow + label slide in + line expand
 			task.spawn(function()
-				TweenService:Create(SectionLabel, TweenInfo.new(0.35, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
-					Position = UDim2.new(0, 0, 0, 3),
+				-- Accent bar grandit
+				TweenService:Create(SectionAccent, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+					Size = UDim2.new(0, 2, 0, 14)
+				}):Play()
+				task.wait(0.05)
+				-- Label slide depuis gauche
+				TweenService:Create(SectionLabel, TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+					Position = UDim2.new(0, 0, 0, 0),
 					TextTransparency = 0
 				}):Play()
-				task.wait(0.1)
-				TweenService:Create(SectionLine, TweenInfo.new(0.45, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+				task.wait(0.08)
+				-- Ligne expand
+				TweenService:Create(SectionLine, TweenInfo.new(0.4, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
 					Size = UDim2.new(1, 0, 0, 1)
 				}):Play()
 			end)
 
 			AddConnection(SectionFrame.Holder.UIListLayout:GetPropertyChangedSignal("AbsoluteContentSize"), function()
-				SectionFrame.Size = UDim2.new(1, 0, 0, SectionFrame.Holder.UIListLayout.AbsoluteContentSize.Y + 31)
+				SectionFrame.Size = UDim2.new(1, 0, 0, SectionFrame.Holder.UIListLayout.AbsoluteContentSize.Y + 26)
 				SectionFrame.Holder.Size = UDim2.new(1, 0, 0, SectionFrame.Holder.UIListLayout.AbsoluteContentSize.Y)
 			end)
 
@@ -3830,6 +3901,8 @@ task.wait(0.25)
 			for i, v in next, GetElements(SectionFrame.Holder) do
 				SectionFunction[i] = v
 			end
+			return SectionFunction
+		end	
 			return SectionFunction
 		end	
 		for i, v in next, GetElements(Container) do
