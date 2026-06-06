@@ -40,14 +40,6 @@ local function GetIcon(IconName)
     return Icons[IconName] or nil
 end
 
-local testIcon = GetIcon("check")
-if testIcon then
-    print("Icon found: " .. testIcon)
-else
-    print("Icon not found.")
-end
-
-
 -- Détruire l'ancien Orion s'il existe déjà
 local OldOrion = (gethui and gethui() or game:GetService("CoreGui")):FindFirstChild("Orion")
 if OldOrion then
@@ -69,7 +61,6 @@ function OrionLib:IsRunning()
 	else
 		return Orion.Parent == game:GetService("CoreGui")
 	end
-
 end
 
 local function AddConnection(Signal, Function)
@@ -85,7 +76,6 @@ task.spawn(function()
 	while (OrionLib:IsRunning()) do
 		wait()
 	end
-
 	for _, Connection in next, OrionLib.Connections do
 		Connection:Disconnect()
 	end
@@ -99,7 +89,6 @@ local function MakeDraggable(DragPoint, Main)
 				Dragging = true
 				MousePos = Input.Position
 				FramePos = Main.Position
-
 				Input.Changed:Connect(function()
 					if Input.UserInputState == Enum.UserInputState.End then
 						Dragging = false
@@ -337,11 +326,9 @@ CreateElement("Image", function(ImageID)
 		Image = ImageID,
 		BackgroundTransparency = 1
 	})
-
 	if GetIcon(ImageID) ~= nil then
 		ImageNew.Image = GetIcon(ImageID)
 	end	
-
 	return ImageNew
 end)
 
@@ -387,13 +374,11 @@ function OrionLib:MakeNotification(NotificationConfig)
 		NotificationConfig.Content = NotificationConfig.Content or "Test"
 		NotificationConfig.Image = NotificationConfig.Image or "rbxassetid://4384403532"
 		NotificationConfig.Time = NotificationConfig.Time or 15
-
 		local NotificationParent = SetProps(MakeElement("TFrame"), {
 			Size = UDim2.new(1, 0, 0, 0),
 			AutomaticSize = Enum.AutomaticSize.Y,
 			Parent = NotificationHolder
 		})
-
 		local NotificationFrame = SetChildren(SetProps(MakeElement("RoundFrame", Color3.fromRGB(25, 25, 25), 0, 10), {
 			Parent = NotificationParent, 
 			Size = UDim2.new(1, 0, 0, 0),
@@ -474,15 +459,12 @@ function OrionLib:MakeWindow(WindowConfig)
 	-- Fonction qui joue l'animation d'un element (appelee directement OU depuis la queue)
 	local function _PlayElementAnim(frame, elementType, index)
 		local delay = index * 0.04
-
 		local origTransparency = frame.BackgroundTransparency
 		local origSize = frame.Size
 		local origClips = frame.ClipsDescendants
-
 		frame.BackgroundTransparency = 1
 		frame.ClipsDescendants = true
 		frame.Size = UDim2.new(origSize.X.Scale, origSize.X.Offset, 0, 0)
-
 		local hiddenDescs = {}
 		local textDescs = {}
 		for _, desc in next, frame:GetDescendants() do
@@ -498,17 +480,12 @@ function OrionLib:MakeWindow(WindowConfig)
 				desc.Transparency = 1
 			end
 		end
-
 		task.spawn(function()
 			task.wait(delay)
-
-			-- Phase 1: Grow avec elastic bounce
 			TweenService:Create(frame, TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
 				Size = origSize,
 				BackgroundTransparency = origTransparency
 			}):Play()
-
-			-- Flash de couleur
 			task.spawn(function()
 				local origBG = frame.BackgroundColor3
 				frame.BackgroundColor3 = Color3.fromRGB(50, 50, 60)
@@ -517,17 +494,12 @@ function OrionLib:MakeWindow(WindowConfig)
 					BackgroundColor3 = origBG
 				}):Play()
 			end)
-
 			task.wait(0.08)
-
-			-- Phase 2: Reveal enfants
 			for _, info in next, hiddenDescs do
 				TweenService:Create(info.obj, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
 					[info.prop] = info.orig
 				}):Play()
 			end
-
-			-- Phase 3: Glitch texte
 			if #textDescs > 0 then
 				task.spawn(function()
 					for _ = 1, 3 do
@@ -553,8 +525,6 @@ function OrionLib:MakeWindow(WindowConfig)
 					end
 				end)
 			end
-
-			-- Phase 4: Glow sweep
 			task.spawn(function()
 				local sweep = Instance.new("Frame")
 				sweep.Size = UDim2.new(0, 3, 1, 0)
@@ -571,8 +541,6 @@ function OrionLib:MakeWindow(WindowConfig)
 				task.wait(0.35)
 				sweep:Destroy()
 			end)
-
-			-- Phase 5: Underline glow
 			task.spawn(function()
 				local underline = Instance.new("Frame")
 				underline.Size = UDim2.new(0, 0, 0, 1)
@@ -592,7 +560,6 @@ function OrionLib:MakeWindow(WindowConfig)
 				task.wait(0.35)
 				underline:Destroy()
 			end)
-
 			task.wait(0.35)
 			frame.ClipsDescendants = origClips
 		end)
@@ -600,23 +567,17 @@ function OrionLib:MakeWindow(WindowConfig)
 
 	local function _PlayTabAnim(tabFrame, isFirst, index)
 		local delay = index * 0.06
-
 		local origSize = tabFrame.Size
 		tabFrame.Size = UDim2.new(origSize.X.Scale, origSize.X.Offset, 0, 0)
 		tabFrame.ClipsDescendants = true
 		tabFrame.Title.TextTransparency = 1
 		tabFrame.Ico.ImageTransparency = 1
-
 		task.spawn(function()
 			task.wait(delay)
-
 			TweenService:Create(tabFrame, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
 				Size = origSize
 			}):Play()
-
 			task.wait(0.06)
-
-			-- Icon pop pulse
 			TweenService:Create(tabFrame.Ico, TweenInfo.new(0.15, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
 				ImageTransparency = isFirst and 0 or 0.4,
 				Size = UDim2.new(0, 22, 0, 22)
@@ -625,8 +586,6 @@ function OrionLib:MakeWindow(WindowConfig)
 			TweenService:Create(tabFrame.Ico, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
 				Size = UDim2.new(0, 18, 0, 18)
 			}):Play()
-
-			-- Glitch reveal texte
 			local finalText = tabFrame.Title.Text
 			local targetTransp = isFirst and 0 or 0.4
 			TweenService:Create(tabFrame.Title, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
@@ -647,8 +606,6 @@ function OrionLib:MakeWindow(WindowConfig)
 				end
 				tabFrame.Title.Text = finalText
 			end)
-
-			-- Highlight flash
 			task.spawn(function()
 				local highlight = Instance.new("Frame")
 				highlight.Size = UDim2.new(1, 0, 1, 0)
@@ -664,8 +621,6 @@ function OrionLib:MakeWindow(WindowConfig)
 				task.wait(0.35)
 				highlight:Destroy()
 			end)
-
-			-- Side accent line
 			task.spawn(function()
 				local accent = Instance.new("Frame")
 				accent.Size = UDim2.new(0, 2, 0, 0)
@@ -685,7 +640,6 @@ function OrionLib:MakeWindow(WindowConfig)
 				task.wait(0.35)
 				accent:Destroy()
 			end)
-
 			task.wait(0.3)
 			tabFrame.ClipsDescendants = false
 		end)
@@ -757,7 +711,6 @@ function OrionLib:MakeWindow(WindowConfig)
 		_introIndex = _introIndex + 1
 		_lastElementTime = tick()
 		if _isLoading then
-			-- Pendant le loading: cacher l'element, mettre en queue
 			frame.Visible = false
 			table.insert(_animQueue, {type = "element", frame = frame, elementType = elementType, index = _introIndex})
 		else
@@ -819,9 +772,7 @@ function OrionLib:MakeWindow(WindowConfig)
 	end
 
 	WindowConfig.SearchEnabled = WindowConfig.SearchEnabled or false
-
 	local SearchBarHeight = WindowConfig.SearchEnabled and 40 or 0
-
 	local SearchBar = nil
 	local SearchBox = nil
 
@@ -833,28 +784,22 @@ function OrionLib:MakeWindow(WindowConfig)
 			Name = "SearchBar",
 			ClipsDescendants = true
 		}), "Second")
-
 		local SearchInner = AddThemeObject(SetProps(MakeElement("Frame"), {
 			Size = UDim2.new(1, 0, 1, 0),
 			Position = UDim2.new(0, 0, 0, 0),
 			ZIndex = 2,
 			Parent = SearchBar
 		}), "Second")
-
-		-- Ligne verticale droite
 		AddThemeObject(SetProps(MakeElement("Frame"), {
 			Size = UDim2.new(0, 1, 1, 0),
 			Position = UDim2.new(1, -1, 0, 0),
 			ZIndex = 2
 		}), "Stroke").Parent = SearchInner
-
-		-- Ligne horizontale bas
 		AddThemeObject(SetProps(MakeElement("Frame"), {
 			Size = UDim2.new(1, 0, 0, 1),
 			Position = UDim2.new(0, 0, 1, -1),
 			ZIndex = 2
 		}), "Stroke").Parent = SearchInner
-
 		local SearchIcon = AddThemeObject(SetProps(MakeElement("Image", "search"), {
 			AnchorPoint = Vector2.new(0, 0.5),
 			Position = UDim2.new(0, 10, 0.5, 0),
@@ -863,7 +808,6 @@ function OrionLib:MakeWindow(WindowConfig)
 			ZIndex = 3
 		}), "Text")
 		SearchIcon.Parent = SearchInner
-
 		SearchBox = Create("TextBox", {
 			Size = UDim2.new(1, -34, 1, 0),
 			Position = UDim2.new(0, 30, 0, 0),
@@ -978,15 +922,12 @@ function OrionLib:MakeWindow(WindowConfig)
 		}),
 	}), "Second")
 
-	-- Intégration de la SearchBar dans WindowStuff
 	if WindowConfig.SearchEnabled and SearchBar then
 		SearchBar.Parent = WindowStuff
 		SearchBar.Position = UDim2.new(0, 0, 0, 0)
 		SearchBar.Size = UDim2.new(1, 0, 0, SearchBarHeight)
-
 		TabHolder.Position = UDim2.new(0, 0, 0, SearchBarHeight)
 		TabHolder.Size = UDim2.new(1, 0, 1, -(50 + SearchBarHeight))
-
 		AddConnection(SearchBox:GetPropertyChangedSignal("Text"), function()
 			local Query = SearchBox.Text:lower()
 			for _, Tab in next, TabHolder:GetChildren() do
@@ -1108,7 +1049,6 @@ function OrionLib:MakeWindow(WindowConfig)
 			MainWindow.ClipsDescendants = true
 			WindowTopBarLine.Visible = false
 			MinimizeBtn.Ico.Image = "rbxassetid://7072720870"
-
 			TweenService:Create(MainWindow, TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Size = UDim2.new(0, WindowName.TextBounds.X + 140, 0, 50)}):Play()
 			wait(0.1)
 			WindowStuff.Visible = false	
@@ -1132,7 +1072,6 @@ function OrionLib:MakeWindow(WindowConfig)
 		local glitchChars = {"#","@","!","$","%","&","?","*","/","=","-","+","~","^","<",">","|","\\",":","[","]"}
 		local introText = WindowConfig.IntroText or "Orion Library"
 
-		-- ========== LIGHTING EFFECTS ==========
 		local BlurEffect = Instance.new("BlurEffect")
 		BlurEffect.Size = 0
 		BlurEffect.Parent = game:GetService("Lighting")
@@ -1144,7 +1083,6 @@ function OrionLib:MakeWindow(WindowConfig)
 		ColorFX.Saturation = -0.4
 		ColorFX.Parent = game:GetService("Lighting")
 
-		-- ========== WINDOW SCALE-IN ==========
 		MainWindow.Size = UDim2.new(0, 615 * 0.8, 0, 344 * 0.8)
 		MainWindow.Position = UDim2.new(0.5, -307 * 0.8, 0.5, -172 * 0.8)
 		MainWindow.BackgroundTransparency = 1
@@ -1156,7 +1094,6 @@ function OrionLib:MakeWindow(WindowConfig)
 			BackgroundTransparency = 0
 		}):Play()
 
-		-- ========== OVERLAY PRINCIPAL ==========
 		local LoadOverlay = Instance.new("Frame")
 		LoadOverlay.Size = UDim2.new(1, 0, 1, 0)
 		LoadOverlay.Position = UDim2.new(0, 0, 0, 0)
@@ -1173,7 +1110,6 @@ function OrionLib:MakeWindow(WindowConfig)
 		OverlayStroke.Transparency = 0.5
 		OverlayStroke.Parent = LoadOverlay
 
-		-- ========== 1. GRID BACKGROUND (lignes cyber qui s'etendent) ==========
 		task.spawn(function()
 			for row = 1, 10 do
 				if not LoadOverlay or not LoadOverlay.Parent then break end
@@ -1207,7 +1143,6 @@ function OrionLib:MakeWindow(WindowConfig)
 			end
 		end)
 
-		-- ========== 2. TRIPLE SCANLINE (3 lignes qui balayent) ==========
 		local scanlines = {}
 		local scanData = {
 			{h = 2, col = Color3.fromRGB(255, 255, 255), t = 0.85, speed = 2.2, dir = 1},
@@ -1237,7 +1172,6 @@ function OrionLib:MakeWindow(WindowConfig)
 			end)
 		end
 
-		-- ========== 3. PARTICLES (60 particules multi-couleur + formes) ==========
 		task.spawn(function()
 			local pColors = {
 				Color3.fromRGB(255, 255, 255),
@@ -1279,7 +1213,6 @@ function OrionLib:MakeWindow(WindowConfig)
 			end
 		end)
 
-		-- ========== 4. CORNER DECORATIONS (coins lumineux + diagonales) ==========
 		local corners = {
 			{pos = UDim2.new(0, 4, 0, 4), anchorX = 0, anchorY = 0},
 			{pos = UDim2.new(1, -4, 0, 4), anchorX = 1, anchorY = 0},
@@ -1299,7 +1232,6 @@ function OrionLib:MakeWindow(WindowConfig)
 			TweenService:Create(cornerH, TweenInfo.new(0.6, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
 				Size = UDim2.new(0, 28, 0, 1)
 			}):Play()
-
 			local cornerV = Instance.new("Frame")
 			cornerV.Size = UDim2.new(0, 1, 0, 0)
 			cornerV.Position = c.pos
@@ -1312,8 +1244,6 @@ function OrionLib:MakeWindow(WindowConfig)
 			TweenService:Create(cornerV, TweenInfo.new(0.6, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
 				Size = UDim2.new(0, 1, 0, 28)
 			}):Play()
-
-			-- Corner glow dot
 			task.spawn(function()
 				task.wait(0.5)
 				local cornerDot = Instance.new("Frame")
@@ -1339,7 +1269,6 @@ function OrionLib:MakeWindow(WindowConfig)
 			end)
 		end
 
-		-- ========== 5. ROTATING LOADING SPINNER (cercle qui tourne) ==========
 		task.spawn(function()
 			local spinContainer = Instance.new("Frame")
 			spinContainer.Size = UDim2.new(0, 80, 0, 80)
@@ -1348,8 +1277,6 @@ function OrionLib:MakeWindow(WindowConfig)
 			spinContainer.BackgroundTransparency = 1
 			spinContainer.ZIndex = 1003
 			spinContainer.Parent = LoadOverlay
-
-			-- Spinning dots around center
 			local dotCount = 12
 			for di = 1, dotCount do
 				local angle = (di - 1) * (math.pi * 2 / dotCount)
@@ -1367,8 +1294,6 @@ function OrionLib:MakeWindow(WindowConfig)
 				spinDot.Parent = spinContainer
 				Instance.new("UICorner", spinDot).CornerRadius = UDim.new(1, 0)
 			end
-
-			-- Animate rotation by cycling opacity
 			local step = 0
 			while spinContainer and spinContainer.Parent do
 				step = step + 1
@@ -1383,7 +1308,6 @@ function OrionLib:MakeWindow(WindowConfig)
 			end
 		end)
 
-		-- ========== 6. PULSE WAVES (ondes qui emanent du centre) ==========
 		task.spawn(function()
 			task.wait(0.3)
 			for wave = 1, 8 do
@@ -1402,7 +1326,6 @@ function OrionLib:MakeWindow(WindowConfig)
 					ringStroke.Thickness = 1.5
 					ringStroke.Parent = ring
 					Instance.new("UICorner", ring).CornerRadius = UDim.new(1, 0)
-
 					TweenService:Create(ring, TweenInfo.new(1.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
 						Size = UDim2.new(0, 200, 0, 200)
 					}):Play()
@@ -1416,7 +1339,6 @@ function OrionLib:MakeWindow(WindowConfig)
 			end
 		end)
 
-		-- ========== 7. INTRO ICON — elastic pop + pulse + multi-glow + flicker ==========
 		local IntroIcon = Instance.new("ImageLabel")
 		IntroIcon.Size = UDim2.new(0, 0, 0, 0)
 		IntroIcon.Position = UDim2.new(0.5, 0, 0.26, 0)
@@ -1432,7 +1354,6 @@ function OrionLib:MakeWindow(WindowConfig)
 			Size = UDim2.new(0, 52, 0, 52)
 		}):Play()
 
-		-- 5 glow rings en cascade
 		for ring = 1, 5 do
 			task.spawn(function()
 				task.wait(0.12 * ring)
@@ -1450,7 +1371,6 @@ function OrionLib:MakeWindow(WindowConfig)
 				GlowStroke.Thickness = 2.5 - ring * 0.3
 				GlowStroke.Parent = GlowRing
 				Instance.new("UICorner", GlowRing).CornerRadius = UDim.new(1, 0)
-
 				TweenService:Create(GlowRing, TweenInfo.new(0.9, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
 					Size = UDim2.new(0, 50 + ring * 30, 0, 50 + ring * 30)
 				}):Play()
@@ -1462,7 +1382,6 @@ function OrionLib:MakeWindow(WindowConfig)
 			end)
 		end
 
-		-- Icon breathing pulse
 		task.spawn(function()
 			task.wait(0.7)
 			while IntroIcon and IntroIcon.Parent do
@@ -1479,7 +1398,6 @@ function OrionLib:MakeWindow(WindowConfig)
 			end
 		end)
 
-		-- Icon glitch flicker
 		task.spawn(function()
 			task.wait(0.5)
 			for _ = 1, 12 do
@@ -1491,7 +1409,6 @@ function OrionLib:MakeWindow(WindowConfig)
 			end
 		end)
 
-		-- Icon color flash
 		task.spawn(function()
 			task.wait(0.4)
 			while IntroIcon and IntroIcon.Parent do
@@ -1502,7 +1419,6 @@ function OrionLib:MakeWindow(WindowConfig)
 			end
 		end)
 
-		-- ========== 8. INTRO TEXT — typewriter glitch reveal + cursor ==========
 		local IntroLabel = Instance.new("TextLabel")
 		IntroLabel.Size = UDim2.new(1, -40, 0, 28)
 		IntroLabel.Position = UDim2.new(0.5, 0, 0.26, 42)
@@ -1527,7 +1443,6 @@ function OrionLib:MakeWindow(WindowConfig)
 		Cursor.ZIndex = 1007
 		Cursor.Parent = LoadOverlay
 
-		-- Cursor blink
 		task.spawn(function()
 			while Cursor and Cursor.Parent do
 				Cursor.TextTransparency = 0
@@ -1537,7 +1452,6 @@ function OrionLib:MakeWindow(WindowConfig)
 			end
 		end)
 
-		-- Typewriter avec glitch par lettre
 		task.spawn(function()
 			task.wait(0.35)
 			for i = 1, #introText do
@@ -1561,7 +1475,6 @@ function OrionLib:MakeWindow(WindowConfig)
 				IntroLabel.Text = string.sub(introText, 1, i)
 				task.wait(0.03)
 			end
-			-- Final glitch burst
 			for _ = 1, 6 do
 				local g = ""
 				for c = 1, #introText do
@@ -1579,7 +1492,6 @@ function OrionLib:MakeWindow(WindowConfig)
 			if Cursor and Cursor.Parent then Cursor:Destroy() end
 		end)
 
-		-- ========== 9. CHROMATIC ABERRATION TEXT (texte decale rouge/bleu) ==========
 		local ChromaRed = Instance.new("TextLabel")
 		ChromaRed.Size = UDim2.new(1, -40, 0, 28)
 		ChromaRed.Position = UDim2.new(0.5, -2, 0.26, 41)
@@ -1606,7 +1518,6 @@ function OrionLib:MakeWindow(WindowConfig)
 		ChromaBlue.ZIndex = 1006
 		ChromaBlue.Parent = LoadOverlay
 
-		-- Sync chroma text with main
 		task.spawn(function()
 			while IntroLabel and IntroLabel.Parent do
 				ChromaRed.Text = IntroLabel.Text
@@ -1615,7 +1526,6 @@ function OrionLib:MakeWindow(WindowConfig)
 			end
 		end)
 
-		-- Chromatic pulse (separation qui varie)
 		task.spawn(function()
 			while ChromaRed and ChromaRed.Parent do
 				TweenService:Create(ChromaRed, TweenInfo.new(0.3, Enum.EasingStyle.Sine), {
@@ -1639,7 +1549,6 @@ function OrionLib:MakeWindow(WindowConfig)
 			end
 		end)
 
-		-- ========== 10. SUBTITLE TEXT ==========
 		local SubLabel = Instance.new("TextLabel")
 		SubLabel.Size = UDim2.new(1, -80, 0, 14)
 		SubLabel.Position = UDim2.new(0.5, 0, 0.26, 72)
@@ -1662,7 +1571,6 @@ function OrionLib:MakeWindow(WindowConfig)
 			end
 		end)
 
-		-- ========== 11. TRIPLE SEPARATOR LINES ==========
 		local sepLines = {}
 		for si = 1, 3 do
 			local sep = Instance.new("Frame")
@@ -1683,7 +1591,6 @@ function OrionLib:MakeWindow(WindowConfig)
 			end)
 		end
 
-		-- ========== 12. STATUS TEXT avec glitch cycling + icone + log lines ==========
 		local StatusIcon = Instance.new("TextLabel")
 		StatusIcon.Size = UDim2.new(0, 14, 0, 14)
 		StatusIcon.Position = UDim2.new(0.5, -95, 0.52, 12)
@@ -1734,12 +1641,10 @@ function OrionLib:MakeWindow(WindowConfig)
 			{text = "System ready.", color = Color3.fromRGB(80, 255, 120)},
 		}
 
-		-- Log lines qui s'accumulent au dessus du status
 		local logLines = {}
 		task.spawn(function()
 			for idx, msgData in next, statusMessages do
 				if not StatusLabel or not StatusLabel.Parent then break end
-				-- Glitch transition
 				for _ = 1, 4 do
 					local g = ""
 					for c = 1, #msgData.text do
@@ -1754,8 +1659,6 @@ function OrionLib:MakeWindow(WindowConfig)
 				end
 				StatusLabel.Text = msgData.text
 				StatusLabel.TextColor3 = msgData.color
-
-				-- Push old status to log line above
 				if idx > 1 then
 					task.spawn(function()
 						local logLine = Instance.new("TextLabel")
@@ -1773,7 +1676,6 @@ function OrionLib:MakeWindow(WindowConfig)
 						table.insert(logLines, logLine)
 					end)
 				end
-
 				if idx == #statusMessages then
 					StatusIcon.Text = "*"
 					StatusIcon.TextColor3 = Color3.fromRGB(80, 255, 120)
@@ -1782,7 +1684,6 @@ function OrionLib:MakeWindow(WindowConfig)
 			end
 		end)
 
-		-- ========== 13. PROGRESS BAR avec glow + shimmer + trail ==========
 		local BarBG = Instance.new("Frame")
 		BarBG.Size = UDim2.new(0.55, 0, 0, 5)
 		BarBG.Position = UDim2.new(0.5, 0, 0.75, 0)
@@ -1808,7 +1709,6 @@ function OrionLib:MakeWindow(WindowConfig)
 		BarFill.Parent = BarBG
 		Instance.new("UICorner", BarFill).CornerRadius = UDim.new(1, 0)
 
-		-- Gradient on bar
 		local BarGradient = Instance.new("UIGradient")
 		BarGradient.Color = ColorSequence.new({
 			ColorSequenceKeypoint.new(0, Color3.fromRGB(80, 120, 255)),
@@ -1847,7 +1747,6 @@ function OrionLib:MakeWindow(WindowConfig)
 			end
 		end)
 
-		-- Shimmer sweep
 		task.spawn(function()
 			task.wait(0.3)
 			while BarFill and BarFill.Parent do
@@ -1868,7 +1767,6 @@ function OrionLib:MakeWindow(WindowConfig)
 			end
 		end)
 
-		-- ========== 14. PERCENTAGE with glitch ==========
 		local PctLabel = Instance.new("TextLabel")
 		PctLabel.Size = UDim2.new(0, 60, 0, 14)
 		PctLabel.Position = UDim2.new(1, -12, 1, -14)
@@ -1900,7 +1798,6 @@ function OrionLib:MakeWindow(WindowConfig)
 			end
 		end)
 
-		-- ========== 15. VERSION + TIMESTAMP ==========
 		local InfoLabel = Instance.new("TextLabel")
 		InfoLabel.Size = UDim2.new(0.4, 0, 0, 10)
 		InfoLabel.Position = UDim2.new(0, 10, 1, -14)
@@ -1924,7 +1821,6 @@ function OrionLib:MakeWindow(WindowConfig)
 			end
 		end)
 
-		-- ========== 16. HEX DATA RAIN ==========
 		task.spawn(function()
 			local hexChars = {"0","1","2","3","4","5","6","7","8","9","A","B","C","D","E","F"}
 			for col = 1, 8 do
@@ -1944,7 +1840,6 @@ function OrionLib:MakeWindow(WindowConfig)
 						hexLabel.Text = ""
 						hexLabel.ZIndex = 1000
 						hexLabel.Parent = LoadOverlay
-
 						task.spawn(function()
 							local hex = hexChars[math.random(1,16)] .. hexChars[math.random(1,16)] .. " " .. hexChars[math.random(1,16)] .. hexChars[math.random(1,16)]
 							for c = 1, #hex do
@@ -1964,7 +1859,6 @@ function OrionLib:MakeWindow(WindowConfig)
 			end
 		end)
 
-		-- ========== 17. GLITCH BARS (barres horizontales qui glitchent) ==========
 		task.spawn(function()
 			task.wait(0.6)
 			for _ = 1, 15 do
@@ -1986,7 +1880,6 @@ function OrionLib:MakeWindow(WindowConfig)
 			end
 		end)
 
-		-- ========== 18. GLITCH FLICKER GLOBAL ==========
 		task.spawn(function()
 			task.wait(0.8)
 			for _ = 1, 10 do
@@ -1998,7 +1891,6 @@ function OrionLib:MakeWindow(WindowConfig)
 			end
 		end)
 
-		-- ========== 19. BORDER PULSE ==========
 		task.spawn(function()
 			while OverlayStroke and OverlayStroke.Parent do
 				TweenService:Create(OverlayStroke, TweenInfo.new(0.5, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {
@@ -2014,7 +1906,6 @@ function OrionLib:MakeWindow(WindowConfig)
 			end
 		end)
 
-		-- ========== 20. BACKGROUND PULSE (fond qui respire) ==========
 		task.spawn(function()
 			while LoadOverlay and LoadOverlay.Parent do
 				TweenService:Create(LoadOverlay, TweenInfo.new(1.5, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {
@@ -2028,7 +1919,6 @@ function OrionLib:MakeWindow(WindowConfig)
 			end
 		end)
 
-		-- ========== 21. NOISE/STATIC OVERLAY ==========
 		task.spawn(function()
 			local noiseFrame = Instance.new("Frame")
 			noiseFrame.Size = UDim2.new(1, 0, 1, 0)
@@ -2043,7 +1933,6 @@ function OrionLib:MakeWindow(WindowConfig)
 			end
 		end)
 
-		-- ========== 22. EDGE GLOW LINES (top/bottom edge accent) ==========
 		task.spawn(function()
 			task.wait(0.2)
 			local topEdge = Instance.new("Frame")
@@ -2058,7 +1947,6 @@ function OrionLib:MakeWindow(WindowConfig)
 			TweenService:Create(topEdge, TweenInfo.new(1.0, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
 				Size = UDim2.new(1, 0, 0, 1)
 			}):Play()
-
 			local botEdge = Instance.new("Frame")
 			botEdge.Size = UDim2.new(0, 0, 0, 1)
 			botEdge.Position = UDim2.new(0.5, 0, 1, -1)
@@ -2071,8 +1959,6 @@ function OrionLib:MakeWindow(WindowConfig)
 			TweenService:Create(botEdge, TweenInfo.new(1.0, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
 				Size = UDim2.new(1, 0, 0, 1)
 			}):Play()
-
-			-- Pulse edge glow
 			task.wait(1.0)
 			while topEdge and topEdge.Parent do
 				TweenService:Create(topEdge, TweenInfo.new(0.6, Enum.EasingStyle.Sine), {BackgroundTransparency = 0.8}):Play()
@@ -2084,23 +1970,16 @@ function OrionLib:MakeWindow(WindowConfig)
 			end
 		end)
 
-		-- ========== WAIT FOR MINIMUM ANIMATION TIME ==========
-		-- On attend au moins 3.5s pour le spectacle visuel
 		task.wait(3.5)
 
-		-- ========== WAIT FOR ELEMENTS TO BE CREATED ==========
-		-- On attend que des elements soient crees (tabs, buttons, etc.)
-		-- Polling: attendre que _lastElementTime soit > 0 (un element a ete cree)
-		-- puis attendre 0.3s sans nouvel element (idle = tout est charge)
 		local waitStart = tick()
-		local maxWait = 10 -- securite: max 10s d'attente supplementaire
+		local maxWait = 10
 		while tick() - waitStart < maxWait do
 			if _lastElementTime > 0 then
-				-- Un element a ete cree, attendre qu'il n'y en ait plus de nouveau
 				local idleStart = tick()
 				while tick() - idleStart < 0.4 do
 					if _lastElementTime > idleStart then
-						idleStart = tick() -- reset si nouvel element
+						idleStart = tick()
 					end
 					task.wait(0.05)
 				end
@@ -2109,8 +1988,6 @@ function OrionLib:MakeWindow(WindowConfig)
 			task.wait(0.05)
 		end
 
-		-- ========== TRANSITION OUT MEGA ==========
-		-- Phase 1: Flash blanc
 		local Flash = Instance.new("Frame")
 		Flash.Size = UDim2.new(1, 0, 1, 0)
 		Flash.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
@@ -2122,7 +1999,6 @@ function OrionLib:MakeWindow(WindowConfig)
 			BackgroundTransparency = 1
 		}):Play()
 
-		-- Phase 2: Glitch burst sur tout le contenu
 		task.spawn(function()
 			for _ = 1, 8 do
 				if IntroLabel and IntroLabel.Parent then
@@ -2140,7 +2016,6 @@ function OrionLib:MakeWindow(WindowConfig)
 
 		task.wait(0.15)
 
-		-- Phase 3: Fade out tout le contenu
 		local fadeTargets = {
 			{IntroIcon, "ImageTransparency", 1},
 		}
@@ -2179,7 +2054,6 @@ function OrionLib:MakeWindow(WindowConfig)
 
 		task.wait(0.3)
 
-		-- Phase 4: Overlay split en deux + ligne de decoupe
 		local TopHalf = Instance.new("Frame")
 		TopHalf.Size = UDim2.new(1, 0, 0.5, 0)
 		TopHalf.Position = UDim2.new(0, 0, 0, 0)
@@ -2218,7 +2092,6 @@ function OrionLib:MakeWindow(WindowConfig)
 			Position = UDim2.new(0, 0, 1.05, 0)
 		}):Play()
 
-		-- Fade blur + color correction
 		task.spawn(function()
 			TweenService:Create(BlurEffect, TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
 				Size = 0
@@ -2237,11 +2110,9 @@ function OrionLib:MakeWindow(WindowConfig)
 		task.wait(0.6)
 		LoadOverlay:Destroy()
 
-		-- ========== PLAY QUEUED ANIMATIONS ==========
 		_isLoading = false
 		_introIndex = 0
 
-		-- Rendre visible et animer tous les elements en queue
 		for _, item in next, _animQueue do
 			if item.type == "element" then
 				if item.frame and item.frame.Parent then
@@ -2268,11 +2139,13 @@ function OrionLib:MakeWindow(WindowConfig)
 		end
 		_animQueue = {}
 	end
+	
 	if WindowConfig.IntroEnabled then
 		LoadSequence()
 	end	
 
 	local TabFunction = {}
+	
 	function TabFunction:MakeTab(TabConfig)
 		TabConfig = TabConfig or {}
 		TabConfig.Name = TabConfig.Name or "Tab"
@@ -2303,7 +2176,6 @@ function OrionLib:MakeWindow(WindowConfig)
 			TabFrame.Ico.Image = GetIcon(TabConfig.Icon)
 		end
 
-		-- Animation d'intro du tab dans la sidebar
 		AnimateTabIntro(TabFrame, FirstTab)
 
 		local Container = AddThemeObject(SetChildren(SetProps(MakeElement("ScrollFrame", Color3.fromRGB(255, 255, 255), 5), {
@@ -2323,7 +2195,6 @@ function OrionLib:MakeWindow(WindowConfig)
 
 		if FirstTab then
 			FirstTab = false
-			-- Les transparences sont gerees par AnimateTabIntro
 			TabFrame.Title.Font = Enum.Font.FredokaOne
 			Container.Visible = true
 		end    
@@ -2346,67 +2217,62 @@ function OrionLib:MakeWindow(WindowConfig)
 			TabFrame.Title.Font = Enum.Font.FredokaOne
 			Container.Visible = true
 
-				-- Animation: les elements apparaissent l'un apres l'autre avec slide + fade
-				task.spawn(function()
-					local Items = {}
-					for _, Child in next, Container:GetChildren() do
-						if Child:IsA("Frame") or Child:IsA("TextButton") then
-							table.insert(Items, Child)
+			task.spawn(function()
+				local Items = {}
+				for _, Child in next, Container:GetChildren() do
+					if Child:IsA("Frame") or Child:IsA("TextButton") then
+						table.insert(Items, Child)
+					end
+				end
+				for _, Item in next, Items do
+					Item.Position = UDim2.new(0, 25, Item.Position.Y.Scale, Item.Position.Y.Offset)
+					Item.BackgroundTransparency = 1
+					for _, desc in next, Item:GetDescendants() do
+						if desc:IsA("TextLabel") then
+							desc.TextTransparency = 1
+						elseif desc:IsA("ImageLabel") or desc:IsA("ImageButton") then
+							desc.ImageTransparency = 1
 						end
 					end
-					-- Cacher tous les elements d'abord
-					for _, Item in next, Items do
-						Item.Position = UDim2.new(0, 25, Item.Position.Y.Scale, Item.Position.Y.Offset)
-						Item.BackgroundTransparency = 1
-						-- Cacher texte et images aussi
-						for _, desc in next, Item:GetDescendants() do
-							if desc:IsA("TextLabel") then
-								desc.TextTransparency = 1
-							elseif desc:IsA("ImageLabel") or desc:IsA("ImageButton") then
-								desc.ImageTransparency = 1
-							end
+				end
+				for _, Item in next, Items do
+					task.wait(0.045)
+					TweenService:Create(Item, TweenInfo.new(0.35, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+						Position = UDim2.new(0, 0, Item.Position.Y.Scale, Item.Position.Y.Offset),
+						BackgroundTransparency = 0.7
+					}):Play()
+					for _, desc in next, Item:GetDescendants() do
+						if desc:IsA("TextLabel") then
+							TweenService:Create(desc, TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+								TextTransparency = desc.Name == "Content" and 0 or (desc.Name == "Value" and 0.8 or 0)
+							}):Play()
+						elseif desc:IsA("ImageLabel") or desc:IsA("ImageButton") then
+							TweenService:Create(desc, TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+								ImageTransparency = 0
+							}):Play()
 						end
 					end
-					-- Reveal un par un avec stagger
-					for _, Item in next, Items do
-						task.wait(0.045)
-						TweenService:Create(Item, TweenInfo.new(0.35, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
-							Position = UDim2.new(0, 0, Item.Position.Y.Scale, Item.Position.Y.Offset),
-							BackgroundTransparency = 0.7
-						}):Play()
-						-- Reveal enfants (texte, images)
-						for _, desc in next, Item:GetDescendants() do
-							if desc:IsA("TextLabel") then
-								TweenService:Create(desc, TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
-									TextTransparency = desc.Name == "Content" and 0 or (desc.Name == "Value" and 0.8 or 0)
+					local sliderDrag = Item:FindFirstChild("Frame")
+					if sliderDrag then
+						local innerDrag = sliderDrag:FindFirstChildWhichIsA("Frame")
+						if innerDrag and innerDrag.Name ~= "UICorner" then
+							local savedSize = innerDrag.Size
+							innerDrag.Size = UDim2.new(0, 0, 1, 0)
+							task.spawn(function()
+								task.wait(0.2)
+								TweenService:Create(innerDrag, TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+									Size = savedSize
 								}):Play()
-							elseif desc:IsA("ImageLabel") or desc:IsA("ImageButton") then
-								TweenService:Create(desc, TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
-									ImageTransparency = 0
-								}):Play()
-							end
-						end
-						-- Si c'est un slider, animer le remplissage
-						local sliderDrag = Item:FindFirstChild("Frame")
-						if sliderDrag then
-							local innerDrag = sliderDrag:FindFirstChildWhichIsA("Frame")
-							if innerDrag and innerDrag.Name ~= "UICorner" then
-								local savedSize = innerDrag.Size
-								innerDrag.Size = UDim2.new(0, 0, 1, 0)
-								task.spawn(function()
-									task.wait(0.2)
-									TweenService:Create(innerDrag, TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
-										Size = savedSize
-									}):Play()
-								end)
-							end
+							end)
 						end
 					end
-				end)
+				end
+			end)
 		end)
 
 		local function GetElements(ItemParent)
 			local ElementFunction = {}
+			
 			function ElementFunction:AddLabel(Text)
 				local LabelFrame = AddThemeObject(SetChildren(SetProps(MakeElement("RoundFrame", Color3.fromRGB(255, 255, 255), 0, 5), {
 					Size = UDim2.new(1, 0, 0, 30),
@@ -2420,21 +2286,18 @@ function OrionLib:MakeWindow(WindowConfig)
 						Name = "Content"
 					}), "Text"),
 					AddThemeObject(MakeElement("Stroke"), "Stroke")
-			}), "Second")
-
-				-- Animation d'intro label
+				}), "Second")
 				AnimateElementIntro(LabelFrame, "label")
-
 				local LabelFunction = {}
 				function LabelFunction:Set(ToChange)
 					LabelFrame.Content.Text = ToChange
 				end
 				return LabelFunction
 			end
+			
 			function ElementFunction:AddParagraph(Text, Content)
 				Text = Text or "Text"
 				Content = Content or "Content"
-
 				local ParagraphFrame = AddThemeObject(SetChildren(SetProps(MakeElement("RoundFrame", Color3.fromRGB(255, 255, 255), 0, 5), {
 					Size = UDim2.new(1, 0, 0, 30),
 					BackgroundTransparency = 0.7,
@@ -2455,35 +2318,28 @@ function OrionLib:MakeWindow(WindowConfig)
 					}), "TextDark"),
 					AddThemeObject(MakeElement("Stroke"), "Stroke")
 				}), "Second")
-
 				AddConnection(ParagraphFrame.Content:GetPropertyChangedSignal("Text"), function()
 					ParagraphFrame.Content.Size = UDim2.new(1, -24, 0, ParagraphFrame.Content.TextBounds.Y)
 					ParagraphFrame.Size = UDim2.new(1, 0, 0, ParagraphFrame.Content.TextBounds.Y + 35)
 				end)
-
 				ParagraphFrame.Content.Text = Content
-
-				-- Animation d'intro paragraph
 				AnimateElementIntro(ParagraphFrame, "paragraph")
-
 				local ParagraphFunction = {}
 				function ParagraphFunction:Set(ToChange)
 					ParagraphFrame.Content.Text = ToChange
 				end
 				return ParagraphFunction
 			end    
+			
 			function ElementFunction:AddButton(ButtonConfig)
 				ButtonConfig = ButtonConfig or {}
 				ButtonConfig.Name = ButtonConfig.Name or "Button"
 				ButtonConfig.Callback = ButtonConfig.Callback or function() end
 				ButtonConfig.Icon = ButtonConfig.Icon or "rbxassetid://3944703587"
-
 				local Button = {}
-
 				local Click = SetProps(MakeElement("Button"), {
 					Size = UDim2.new(1, 0, 1, 0)
 				})
-
 				local ButtonFrame = AddThemeObject(SetChildren(SetProps(MakeElement("RoundFrame", Color3.fromRGB(255, 255, 255), 0, 5), {
 					Size = UDim2.new(1, 0, 0, 33),
 					Parent = ItemParent
@@ -2501,35 +2357,28 @@ function OrionLib:MakeWindow(WindowConfig)
 					AddThemeObject(MakeElement("Stroke"), "Stroke"),
 					Click
 				}), "Second")
-
 				AddConnection(Click.MouseEnter, function()
 					TweenService:Create(ButtonFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = Color3.fromRGB(OrionLib.Themes[OrionLib.SelectedTheme].Second.R * 255 + 3, OrionLib.Themes[OrionLib.SelectedTheme].Second.G * 255 + 3, OrionLib.Themes[OrionLib.SelectedTheme].Second.B * 255 + 3)}):Play()
 				end)
-
 				AddConnection(Click.MouseLeave, function()
 					TweenService:Create(ButtonFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = OrionLib.Themes[OrionLib.SelectedTheme].Second}):Play()
 				end)
-
 				AddConnection(Click.MouseButton1Up, function()
 					TweenService:Create(ButtonFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = Color3.fromRGB(OrionLib.Themes[OrionLib.SelectedTheme].Second.R * 255 + 3, OrionLib.Themes[OrionLib.SelectedTheme].Second.G * 255 + 3, OrionLib.Themes[OrionLib.SelectedTheme].Second.B * 255 + 3)}):Play()
 					spawn(function()
 						ButtonConfig.Callback()
 					end)
 				end)
-
 				AddConnection(Click.MouseButton1Down, function()
 					TweenService:Create(ButtonFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = Color3.fromRGB(OrionLib.Themes[OrionLib.SelectedTheme].Second.R * 255 + 6, OrionLib.Themes[OrionLib.SelectedTheme].Second.G * 255 + 6, OrionLib.Themes[OrionLib.SelectedTheme].Second.B * 255 + 6)}):Play()
 				end)
-
-				-- Animation d'intro button (slide depuis la droite)
 				AnimateElementIntro(ButtonFrame, "button")
-
 				function Button:Set(ButtonText)
 					ButtonFrame.Content.Text = ButtonText
 				end	
-
 				return Button
 			end    
+			
 			function ElementFunction:AddToggle(ToggleConfig)
 				ToggleConfig = ToggleConfig or {}
 				ToggleConfig.Name = ToggleConfig.Name or "Toggle"
@@ -2540,11 +2389,9 @@ function OrionLib:MakeWindow(WindowConfig)
 				ToggleConfig.Save = ToggleConfig.Save or false
 
 				local Toggle = {Value = ToggleConfig.Default, Save = ToggleConfig.Save}
-
 				local Click = SetProps(MakeElement("Button"), {
 					Size = UDim2.new(1, 0, 1, 0)
 				})
-
 				local ToggleBox = SetChildren(SetProps(MakeElement("RoundFrame", ToggleConfig.Color, 0, 4), {
 					Size = UDim2.new(0, 24, 0, 24),
 					Position = UDim2.new(1, -24, 0.5, 0),
@@ -2563,7 +2410,6 @@ function OrionLib:MakeWindow(WindowConfig)
 						Name = "Ico"
 					}),
 				})
-
 				local ToggleFrame = AddThemeObject(SetChildren(SetProps(MakeElement("RoundFrame", Color3.fromRGB(255, 255, 255), 0, 5), {
 					Size = UDim2.new(1, 0, 0, 38),
 					Parent = ItemParent
@@ -2579,156 +2425,154 @@ function OrionLib:MakeWindow(WindowConfig)
 					Click
 				}), "Second")
 
-				local _toggleInitialized = false  -- ← ajoute AVANT la définition de Toggle:Set
+				local _toggleInitialized = false
 
-function Toggle:Set(Value)
-_toggleInitialized = true
-    Toggle.Value = Value
-
-    -- Couleurs de base (toujours actif)
-    TweenService:Create(ToggleBox, TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
-        BackgroundColor3 = Toggle.Value and ToggleConfig.Color or OrionLib.Themes.Default.Divider
-    }):Play()
-    TweenService:Create(ToggleBox.Stroke, TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
-        Color = Toggle.Value and ToggleConfig.Color or OrionLib.Themes.Default.Stroke
-    }):Play()
-    TweenService:Create(ToggleBox.Ico, TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
-        ImageTransparency = Toggle.Value and 0 or 1,
-        Size = Toggle.Value and UDim2.new(0, 20, 0, 20) or UDim2.new(0, 8, 0, 8)
-    }):Play()
-
-    -- Animations supplémentaires (uniquement après init, pas au chargement)
-    if _toggleInitialized then
-
-        -- 1. Bounce élastique du ToggleBox
-        task.spawn(function()
-            TweenService:Create(ToggleBox, TweenInfo.new(0.1, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
-                Size = UDim2.new(0, 30, 0, 30)
-            }):Play()
-            task.wait(0.1)
-            TweenService:Create(ToggleBox, TweenInfo.new(0.35, Enum.EasingStyle.Elastic, Enum.EasingDirection.Out), {
-                Size = UDim2.new(0, 24, 0, 24)
-            }):Play()
-        end)
-
-        -- 2. Anneau ripple autour du ToggleBox
-        task.spawn(function()
-            local ring = Instance.new("Frame")
-            ring.Size = UDim2.new(0, 24, 0, 24)
-            ring.Position = ToggleBox.Position
-            ring.AnchorPoint = ToggleBox.AnchorPoint
-            ring.BackgroundTransparency = 1
-            ring.ZIndex = ToggleBox.ZIndex + 1
-            ring.Parent = ToggleFrame
-            local ringStroke = Instance.new("UIStroke")
-            ringStroke.Color = Toggle.Value and ToggleConfig.Color or Color3.fromRGB(90, 90, 100)
-            ringStroke.Transparency = 0.1
-            ringStroke.Thickness = 2
-            ringStroke.Parent = ring
-            Instance.new("UICorner", ring).CornerRadius = UDim.new(0, 4)
-            TweenService:Create(ring, TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
-                Size = UDim2.new(0, 50, 0, 50)
-            }):Play()
-            TweenService:Create(ringStroke, TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
-                Transparency = 1
-            }):Play()
-            task.wait(0.55)
-            ring:Destroy()
-        end)
-
-        -- 3. Sweep lumineux horizontal sur le frame
-        task.spawn(function()
-            local sweep = Instance.new("Frame")
-            sweep.Size = UDim2.new(0, 4, 1, 0)
-            sweep.Position = UDim2.new(0, 0, 0, 0)
-            sweep.BackgroundColor3 = Toggle.Value and ToggleConfig.Color or Color3.fromRGB(130, 130, 140)
-            sweep.BackgroundTransparency = 0.65
-            sweep.BorderSizePixel = 0
-            sweep.ZIndex = ToggleFrame.ZIndex + 3
-            sweep.Parent = ToggleFrame
-            TweenService:Create(sweep, TweenInfo.new(0.35, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
-                Position = UDim2.new(1, 0, 0, 0),
-                BackgroundTransparency = 1
-            }):Play()
-            task.wait(0.4)
-            sweep:Destroy()
-        end)
-
-        if Toggle.Value then
-            -- 4a. Particules en étoile lors de l'activation
-            task.spawn(function()
-                for p = 1, 6 do
-                    task.spawn(function()
-                        local angle = (p / 6) * math.pi * 2
-                        local radius = math.random(20, 32)
-                        local dot = Instance.new("Frame")
-                        dot.Size = UDim2.new(0, 5, 0, 5)
-                        dot.Position = UDim2.new(
-                            ToggleBox.Position.X.Scale,
-                            ToggleBox.Position.X.Offset + math.cos(angle) * radius,
-                            ToggleBox.Position.Y.Scale,
-                            ToggleBox.Position.Y.Offset + math.sin(angle) * radius
-                        )
-                        dot.AnchorPoint = Vector2.new(0.5, 0.5)
-                        dot.BackgroundColor3 = p % 2 == 0 and ToggleConfig.Color or Color3.fromRGB(255, 255, 255)
-                        dot.BackgroundTransparency = 0
-                        dot.BorderSizePixel = 0
-                        dot.ZIndex = ToggleBox.ZIndex + 4
-                        dot.Parent = ToggleFrame
-                        Instance.new("UICorner", dot).CornerRadius = UDim.new(1, 0)
-                        TweenService:Create(dot, TweenInfo.new(0.4, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
-                            Position = UDim2.new(
-                                ToggleBox.Position.X.Scale,
-                                ToggleBox.Position.X.Offset + math.cos(angle) * (radius + 16),
-                                ToggleBox.Position.Y.Scale,
-                                ToggleBox.Position.Y.Offset + math.sin(angle) * (radius + 16)
-                            ),
-                            BackgroundTransparency = 1,
-                            Size = UDim2.new(0, 2, 0, 2)
-                        }):Play()
-                        task.wait(0.5)
-                        dot:Destroy()
-                    end)
-                end
-            end)
-        else
-            -- 4b. Tremblement lors de la désactivation
-            task.spawn(function()
-                local origPos = ToggleBox.Position
-                for _ = 1, 3 do
-                    TweenService:Create(ToggleBox, TweenInfo.new(0.04, Enum.EasingStyle.Linear), {
-                        Position = UDim2.new(origPos.X.Scale, origPos.X.Offset + 3, origPos.Y.Scale, origPos.Y.Offset)
-                    }):Play()
-                    task.wait(0.04)
-                    TweenService:Create(ToggleBox, TweenInfo.new(0.04, Enum.EasingStyle.Linear), {
-                        Position = UDim2.new(origPos.X.Scale, origPos.X.Offset - 3, origPos.Y.Scale, origPos.Y.Offset)
-                    }):Play()
-                    task.wait(0.04)
-                end
-                TweenService:Create(ToggleBox, TweenInfo.new(0.05, Enum.EasingStyle.Linear), {
-                    Position = origPos
-                }):Play()
-            end)
-        end
-
-        -- 5. Flash couleur sur le frame
-        task.spawn(function()
-            local baseColor = OrionLib.Themes[OrionLib.SelectedTheme].Second
-            local flashColor = Toggle.Value
-                and Color3.fromRGB(math.min(baseColor.R * 255 + 12, 255), math.min(baseColor.G * 255 + 12, 255), math.min(baseColor.B * 255 + 12, 255))
-                or  Color3.fromRGB(math.max(baseColor.R * 255 - 4, 0), math.max(baseColor.G * 255 - 4, 0), math.max(baseColor.B * 255 - 4, 0))
-            TweenService:Create(ToggleFrame, TweenInfo.new(0.08, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
-                BackgroundColor3 = flashColor
-            }):Play()
-            task.wait(0.18)
-            TweenService:Create(ToggleFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
-                BackgroundColor3 = baseColor
-            }):Play()
-        end)
-    end
-
-    ToggleConfig.Callback(Toggle.Value)
-end
+				function Toggle:Set(Value)
+					_toggleInitialized = true
+					Toggle.Value = Value
+					TweenService:Create(ToggleBox, TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+						BackgroundColor3 = Toggle.Value and ToggleConfig.Color or OrionLib.Themes.Default.Divider
+					}):Play()
+					TweenService:Create(ToggleBox.Stroke, TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+						Color = Toggle.Value and ToggleConfig.Color or OrionLib.Themes.Default.Stroke
+					}):Play()
+					TweenService:Create(ToggleBox.Ico, TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+						ImageTransparency = Toggle.Value and 0 or 1,
+						Size = Toggle.Value and UDim2.new(0, 20, 0, 20) or UDim2.new(0, 8, 0, 8)
+					}):Play()
+					if _toggleInitialized then
+						task.spawn(function()
+							TweenService:Create(ToggleBox, TweenInfo.new(0.1, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+								Size = UDim2.new(0, 30, 0, 30)
+							}):Play()
+							task.wait(0.1)
+							TweenService:Create(ToggleBox, TweenInfo.new(0.35, Enum.EasingStyle.Elastic, Enum.EasingDirection.Out), {
+								Size = UDim2.new(0, 24, 0, 24)
+							}):Play()
+						end)
+						task.spawn(function()
+							local ring = Instance.new("Frame")
+							ring.Size = UDim2.new(0, 24, 0, 24)
+							ring.Position = ToggleBox.Position
+							ring.AnchorPoint = ToggleBox.AnchorPoint
+							ring.BackgroundTransparency = 1
+							ring.ZIndex = ToggleBox.ZIndex + 1
+							ring.Parent = ToggleFrame
+							local ringStroke = Instance.new("UIStroke")
+							ringStroke.Color = Toggle.Value and ToggleConfig.Color or Color3.fromRGB(90, 90, 100)
+							ringStroke.Transparency = 0.1
+							ringStroke.Thickness = 2
+							ringStroke.Parent = ring
+							Instance.new("UICorner", ring).CornerRadius = UDim.new(0, 4)
+							TweenService:Create(ring, TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+								Size = UDim2.new(0, 50, 0, 50)
+							}):Play()
+							TweenService:Create(ringStroke, TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+								Transparency = 1
+							}):Play()
+							task.wait(0.55)
+							ring:Destroy()
+						end)
+						task.spawn(function()
+							local sweep = Instance.new("Frame")
+							sweep.Size = UDim2.new(0, 4, 1, 0)
+							sweep.Position = UDim2.new(0, 0, 0, 0)
+							sweep.BackgroundColor3 = Toggle.Value and ToggleConfig.Color or Color3.fromRGB(130, 130, 140)
+							sweep.BackgroundTransparency = 0.65
+							sweep.BorderSizePixel = 0
+							sweep.ZIndex = ToggleFrame.ZIndex + 3
+							sweep.Parent = ToggleFrame
+							TweenService:Create(sweep, TweenInfo.new(0.35, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+								Position = UDim2.new(1, 0, 0, 0),
+								BackgroundTransparency = 1
+							}):Play()
+							task.wait(0.4)
+							sweep:Destroy()
+						end)
+						if Toggle.Value then
+							task.spawn(function()
+								for p = 1, 6 do
+									task.spawn(function()
+										local angle = (p / 6) * math.pi * 2
+										local radius = math.random(20, 32)
+										local dot = Instance.new("Frame")
+										dot.Size = UDim2.new(0, 5, 0, 5)
+										dot.Position = UDim2.new(
+											ToggleBox.Position.X.Scale,
+											ToggleBox.Position.X.Offset + math.cos(angle) * radius,
+											ToggleBox.Position.Y.Scale,
+											ToggleBox.Position.Y.Offset + math.sin(angle) * radius
+										)
+										dot.AnchorPoint = Vector2.new(0.5, 0.5)
+										dot.BackgroundColor3 = p % 2 == 0 and ToggleConfig.Color or Color3.fromRGB(255, 255, 255)
+										dot.BackgroundTransparency = 0
+										dot.BorderSizePixel = 0
+										dot.ZIndex = ToggleBox.ZIndex + 4
+										dot.Parent = ToggleFrame
+										Instance.new("UICorner", dot).CornerRadius = UDim.new(1, 0)
+										TweenService:Create(dot, TweenInfo.new(0.4, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+											Position = UDim2.new(
+												ToggleBox.Position.X.Scale,
+												ToggleBox.Position.X.Offset + math.cos(angle) * (radius + 16),
+												ToggleBox.Position.Y.Scale,
+												ToggleBox.Position.Y.Offset + math.sin(angle) * (radius + 16)
+											),
+											BackgroundTransparency = 1,
+											Size = UDim2.new(0, 2, 0, 2)
+										}):Play()
+										task.wait(0.5)
+										dot:Destroy()
+									end)
+								end
+							end)
+						else
+							task.spawn(function()
+								local origPos = ToggleBox.Position
+								for _ = 1, 3 do
+									TweenService:Create(ToggleBox, TweenInfo.new(0.04, Enum.EasingStyle.Linear), {
+										Position = UDim2.new(origPos.X.Scale, origPos.X.Offset + 3, origPos.Y.Scale, origPos.Y.Offset)
+									}):Play()
+									task.wait(0.04)
+									TweenService:Create(ToggleBox, TweenInfo.new(0.04, Enum.EasingStyle.Linear), {
+										Position = UDim2.new(origPos.X.Scale, origPos.X.Offset - 3, origPos.Y.Scale, origPos.Y.Offset)
+									}):Play()
+									task.wait(0.04)
+								end
+								TweenService:Create(ToggleBox, TweenInfo.new(0.05, Enum.EasingStyle.Linear), {
+									Position = origPos
+								}):Play()
+							end)
+						end
+						task.spawn(function()
+							local baseColor = OrionLib.Themes[OrionLib.SelectedTheme].Second
+							local flashColor = Toggle.Value
+								and Color3.fromRGB(math.min(baseColor.R * 255 + 12, 255), math.min(baseColor.G * 255 + 12, 255), math.min(baseColor.B * 255 + 12, 255))
+								or  Color3.fromRGB(math.max(baseColor.R * 255 - 4, 0), math.max(baseColor.G * 255 - 4, 0), math.max(baseColor.B * 255 - 4, 0))
+							TweenService:Create(ToggleFrame, TweenInfo.new(0.08, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+								BackgroundColor3 = flashColor
+							}):Play()
+							task.wait(0.18)
+							TweenService:Create(ToggleFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+								BackgroundColor3 = baseColor
+							}):Play()
+						end)
+					end
+					ToggleConfig.Callback(Toggle.Value)
+				end
+				
+				AddConnection(Click.MouseButton1Click, function()
+					Toggle:Set(not Toggle.Value)
+					SaveCfg(game.GameId)
+				end)
+				
+				Toggle:Set(Toggle.Value)
+				AnimateToggleIntro(ToggleBox)
+				if ToggleConfig.Flag then				
+					OrionLib.Flags[ToggleConfig.Flag] = Toggle
+				end
+				return Toggle
+			end
+			
 			function ElementFunction:AddSlider(SliderConfig)
 				SliderConfig = SliderConfig or {}
 				SliderConfig.Name = SliderConfig.Name or "Slider"
@@ -2818,17 +2662,16 @@ end
 					SliderConfig.Callback(self.Value)
 				end      
 
-						Slider:Set(Slider.Value)
+				Slider:Set(Slider.Value)
+				AnimateElementIntro(SliderFrame, "slider")
+				AnimateSliderIntro(SliderDrag, Slider.Value, SliderConfig.Min, SliderConfig.Max)
 
-					-- Animation d'intro slider (frame slide + barre qui s'allonge)
-					AnimateElementIntro(SliderFrame, "slider")
-					AnimateSliderIntro(SliderDrag, Slider.Value, SliderConfig.Min, SliderConfig.Max)
-
-					if SliderConfig.Flag then				
-						OrionLib.Flags[SliderConfig.Flag] = Slider
-					end
-					return Slider
+				if SliderConfig.Flag then				
+					OrionLib.Flags[SliderConfig.Flag] = Slider
+				end
+				return Slider
 			end  
+			
 			function ElementFunction:AddDropdown(DropdownConfig)
 				DropdownConfig = DropdownConfig or {}
 				DropdownConfig.Name = DropdownConfig.Name or "Dropdown"
@@ -2846,7 +2689,6 @@ end
 				end
 
 				local DropdownList = MakeElement("List")
-
 				local DropdownContainer = AddThemeObject(SetProps(SetChildren(MakeElement("ScrollFrame", Color3.fromRGB(40, 40, 40), 4), {
 					DropdownList
 				}), {
@@ -2953,10 +2795,8 @@ end
 						end	
 						return
 					end
-
 					Dropdown.Value = Value
 					DropdownFrame.F.Selected.Text = Dropdown.Value
-
 					for _, v in pairs(Dropdown.Buttons) do
 						TweenService:Create(v,TweenInfo.new(.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),{BackgroundTransparency = 1}):Play()
 						TweenService:Create(v.Title,TweenInfo.new(.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),{TextTransparency = 0.4}):Play()
@@ -2979,8 +2819,6 @@ end
 
 				Dropdown:Refresh(Dropdown.Options, false)
 				Dropdown:Set(Dropdown.Value)
-
-				-- Animation d'intro dropdown
 				AnimateElementIntro(DropdownFrame, "dropdown")
 
 				if DropdownConfig.Flag then				
@@ -2988,6 +2826,7 @@ end
 				end
 				return Dropdown
 			end
+			
 			function ElementFunction:AddBind(BindConfig)
 				BindConfig.Name = BindConfig.Name or "Bind"
 				BindConfig.Default = BindConfig.Default or Enum.KeyCode.Unknown
@@ -2998,11 +2837,9 @@ end
 
 				local Bind = {Value, Binding = false, Type = "Bind", Save = BindConfig.Save}
 				local Holding = false
-
 				local Click = SetProps(MakeElement("Button"), {
 					Size = UDim2.new(1, 0, 1, 0)
 				})
-
 				local BindBox = AddThemeObject(SetChildren(SetProps(MakeElement("RoundFrame", Color3.fromRGB(255, 255, 255), 0, 4), {
 					Size = UDim2.new(0, 24, 0, 24),
 					Position = UDim2.new(1, -12, 0.5, 0),
@@ -3016,7 +2853,6 @@ end
 						Name = "Value"
 					}), "Text")
 				}), "Main")
-
 				local BindFrame = AddThemeObject(SetChildren(SetProps(MakeElement("RoundFrame", Color3.fromRGB(255, 255, 255), 0, 5), {
 					Size = UDim2.new(1, 0, 0, 38),
 					Parent = ItemParent
@@ -3031,11 +2867,9 @@ end
 					BindBox,
 					Click
 				}), "Second")
-
 				AddConnection(BindBox.Value:GetPropertyChangedSignal("Text"), function()
 					TweenService:Create(BindBox, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Size = UDim2.new(0, BindBox.Value.TextBounds.X + 16, 0, 24)}):Play()
 				end)
-
 				AddConnection(Click.InputEnded, function(Input)
 					if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
 						if Bind.Binding then return end
@@ -3043,7 +2877,6 @@ end
 						BindBox.Value.Text = ""
 					end
 				end)
-
 				AddConnection(UserInputService.InputBegan, function(Input)
 					if UserInputService:GetFocusedTextBox() then return end
 					if (Input.KeyCode.Name == Bind.Value or Input.UserInputType.Name == Bind.Value) and not Bind.Binding then
@@ -3070,7 +2903,6 @@ end
 						SaveCfg(game.GameId)
 					end
 				end)
-
 				AddConnection(UserInputService.InputEnded, function(Input)
 					if Input.KeyCode.Name == Bind.Value or Input.UserInputType.Name == Bind.Value then
 						if BindConfig.Hold and Holding then
@@ -3079,40 +2911,32 @@ end
 						end
 					end
 				end)
-
 				AddConnection(Click.MouseEnter, function()
 					TweenService:Create(BindFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = Color3.fromRGB(OrionLib.Themes[OrionLib.SelectedTheme].Second.R * 255 + 3, OrionLib.Themes[OrionLib.SelectedTheme].Second.G * 255 + 3, OrionLib.Themes[OrionLib.SelectedTheme].Second.B * 255 + 3)}):Play()
 				end)
-
 				AddConnection(Click.MouseLeave, function()
 					TweenService:Create(BindFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = OrionLib.Themes[OrionLib.SelectedTheme].Second}):Play()
 				end)
-
 				AddConnection(Click.MouseButton1Up, function()
 					TweenService:Create(BindFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = Color3.fromRGB(OrionLib.Themes[OrionLib.SelectedTheme].Second.R * 255 + 3, OrionLib.Themes[OrionLib.SelectedTheme].Second.G * 255 + 3, OrionLib.Themes[OrionLib.SelectedTheme].Second.B * 255 + 3)}):Play()
 				end)
-
 				AddConnection(Click.MouseButton1Down, function()
 					TweenService:Create(BindFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = Color3.fromRGB(OrionLib.Themes[OrionLib.SelectedTheme].Second.R * 255 + 6, OrionLib.Themes[OrionLib.SelectedTheme].Second.G * 255 + 6, OrionLib.Themes[OrionLib.SelectedTheme].Second.B * 255 + 6)}):Play()
 				end)
-
 				function Bind:Set(Key)
 					Bind.Binding = false
 					Bind.Value = Key or Bind.Value
 					Bind.Value = Bind.Value.Name or Bind.Value
 					BindBox.Value.Text = Bind.Value
 				end
-
 				Bind:Set(BindConfig.Default)
-
-				-- Animation d'intro bind
 				AnimateElementIntro(BindFrame, "bind")
-
 				if BindConfig.Flag then				
 					OrionLib.Flags[BindConfig.Flag] = Bind
 				end
 				return Bind
 			end  
+			
 			function ElementFunction:AddTextbox(TextboxConfig)
 				TextboxConfig = TextboxConfig or {}
 				TextboxConfig.Name = TextboxConfig.Name or "Textbox"
@@ -3123,7 +2947,6 @@ end
 				local Click = SetProps(MakeElement("Button"), {
 					Size = UDim2.new(1, 0, 1, 0)
 				})
-
 				local TextboxActual = AddThemeObject(Create("TextBox", {
 					Size = UDim2.new(1, 0, 1, 0),
 					BackgroundTransparency = 1,
@@ -3135,7 +2958,6 @@ end
 					TextSize = 14,
 					ClearTextOnFocus = false
 				}), "Text")
-
 				local TextContainer = AddThemeObject(SetChildren(SetProps(MakeElement("RoundFrame", Color3.fromRGB(255, 255, 255), 0, 4), {
 					Size = UDim2.new(0, 24, 0, 24),
 					Position = UDim2.new(1, -12, 0.5, 0),
@@ -3144,8 +2966,6 @@ end
 					AddThemeObject(MakeElement("Stroke"), "Stroke"),
 					TextboxActual
 				}), "Main")
-
-
 				local TextboxFrame = AddThemeObject(SetChildren(SetProps(MakeElement("RoundFrame", Color3.fromRGB(255, 255, 255), 0, 5), {
 					Size = UDim2.new(1, 0, 0, 38),
 					Parent = ItemParent
@@ -3160,40 +2980,32 @@ end
 					TextContainer,
 					Click
 				}), "Second")
-
 				AddConnection(TextboxActual:GetPropertyChangedSignal("Text"), function()
 					TweenService:Create(TextContainer, TweenInfo.new(0.45, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Size = UDim2.new(0, TextboxActual.TextBounds.X + 16, 0, 24)}):Play()
 				end)
-
 				AddConnection(TextboxActual.FocusLost, function()
 					TextboxConfig.Callback(TextboxActual.Text)
 					if TextboxConfig.TextDisappear then
 						TextboxActual.Text = ""
 					end	
 				end)
-
 				TextboxActual.Text = TextboxConfig.Default
-
 				AddConnection(Click.MouseEnter, function()
 					TweenService:Create(TextboxFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = Color3.fromRGB(OrionLib.Themes[OrionLib.SelectedTheme].Second.R * 255 + 3, OrionLib.Themes[OrionLib.SelectedTheme].Second.G * 255 + 3, OrionLib.Themes[OrionLib.SelectedTheme].Second.B * 255 + 3)}):Play()
 				end)
-
 				AddConnection(Click.MouseLeave, function()
 					TweenService:Create(TextboxFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = OrionLib.Themes[OrionLib.SelectedTheme].Second}):Play()
 				end)
-
 				AddConnection(Click.MouseButton1Up, function()
 					TweenService:Create(TextboxFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = Color3.fromRGB(OrionLib.Themes[OrionLib.SelectedTheme].Second.R * 255 + 3, OrionLib.Themes[OrionLib.SelectedTheme].Second.G * 255 + 3, OrionLib.Themes[OrionLib.SelectedTheme].Second.B * 255 + 3)}):Play()
 					TextboxActual:CaptureFocus()
 				end)
-
 				AddConnection(Click.MouseButton1Down, function()
 					TweenService:Create(TextboxFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = Color3.fromRGB(OrionLib.Themes[OrionLib.SelectedTheme].Second.R * 255 + 6, OrionLib.Themes[OrionLib.SelectedTheme].Second.G * 255 + 6, OrionLib.Themes[OrionLib.SelectedTheme].Second.B * 255 + 6)}):Play()
 				end)
-
-				-- Animation d'intro textbox
 				AnimateElementIntro(TextboxFrame, "textbox")
 			end 
+			
 			function ElementFunction:AddColorpicker(ColorpickerConfig)
 				ColorpickerConfig = ColorpickerConfig or {}
 				ColorpickerConfig.Name = ColorpickerConfig.Name or "Colorpicker"
@@ -3213,7 +3025,6 @@ end
 					BackgroundTransparency = 1,
 					Image = "http://www.roblox.com/asset/?id=4805639000"
 				})
-
 				local HueSelection = Create("ImageLabel", {
 					Size = UDim2.new(0, 18, 0, 18),
 					Position = UDim2.new(0.5, 0, 1 - select(1, Color3.toHSV(Colorpicker.Value))),
@@ -3222,7 +3033,6 @@ end
 					BackgroundTransparency = 1,
 					Image = "http://www.roblox.com/asset/?id=4805639000"
 				})
-
 				local Color = Create("ImageLabel", {
 					Size = UDim2.new(1, -25, 1, 0),
 					Visible = false,
@@ -3231,7 +3041,6 @@ end
 					Create("UICorner", {CornerRadius = UDim.new(0, 5)}),
 					ColorSelection
 				})
-
 				local Hue = Create("Frame", {
 					Size = UDim2.new(0, 20, 1, 0),
 					Position = UDim2.new(1, -20, 0, 0),
@@ -3241,7 +3050,6 @@ end
 					Create("UICorner", {CornerRadius = UDim.new(0, 5)}),
 					HueSelection
 				})
-
 				local ColorpickerContainer = Create("Frame", {
 					Position = UDim2.new(0, 0, 0, 32),
 					Size = UDim2.new(1, 0, 1, -32),
@@ -3257,11 +3065,9 @@ end
 						PaddingTop = UDim.new(0, 17)
 					})
 				})
-
 				local Click = SetProps(MakeElement("Button"), {
 					Size = UDim2.new(1, 0, 1, 0)
 				})
-
 				local ColorpickerBox = AddThemeObject(SetChildren(SetProps(MakeElement("RoundFrame", Color3.fromRGB(255, 255, 255), 0, 4), {
 					Size = UDim2.new(0, 24, 0, 24),
 					Position = UDim2.new(1, -12, 0.5, 0),
@@ -3269,7 +3075,6 @@ end
 				}), {
 					AddThemeObject(MakeElement("Stroke"), "Stroke")
 				}), "Main")
-
 				local ColorpickerFrame = AddThemeObject(SetChildren(SetProps(MakeElement("RoundFrame", Color3.fromRGB(255, 255, 255), 0, 5), {
 					Size = UDim2.new(1, 0, 0, 38),
 					Parent = ItemParent
@@ -3297,7 +3102,6 @@ end
 					ColorpickerContainer,
 					AddThemeObject(MakeElement("Stroke"), "Stroke"),
 				}), "Second")
-
 				AddConnection(Click.MouseButton1Click, function()
 					Colorpicker.Toggled = not Colorpicker.Toggled
 					TweenService:Create(ColorpickerFrame,TweenInfo.new(.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),{Size = Colorpicker.Toggled and UDim2.new(1, 0, 0, 148) or UDim2.new(1, 0, 0, 38)}):Play()
@@ -3305,7 +3109,6 @@ end
 					Hue.Visible = Colorpicker.Toggled
 					ColorpickerFrame.F.Line.Visible = Colorpicker.Toggled
 				end)
-
 				local function UpdateColorPicker()
 					ColorpickerBox.BackgroundColor3 = Color3.fromHSV(ColorH, ColorS, ColorV)
 					Color.BackgroundColor3 = Color3.fromHSV(ColorH, 1, 1)
@@ -3313,11 +3116,9 @@ end
 					ColorpickerConfig.Callback(ColorpickerBox.BackgroundColor3)
 					SaveCfg(game.GameId)
 				end
-
 				ColorH = 1 - (math.clamp(HueSelection.AbsolutePosition.Y - Hue.AbsolutePosition.Y, 0, Hue.AbsoluteSize.Y) / Hue.AbsoluteSize.Y)
 				ColorS = (math.clamp(ColorSelection.AbsolutePosition.X - Color.AbsolutePosition.X, 0, Color.AbsoluteSize.X) / Color.AbsoluteSize.X)
 				ColorV = 1 - (math.clamp(ColorSelection.AbsolutePosition.Y - Color.AbsolutePosition.Y, 0, Color.AbsoluteSize.Y) / Color.AbsoluteSize.Y)
-
 				AddConnection(Color.InputBegan, function(input)
 					if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
 						if ColorInput then
@@ -3333,7 +3134,6 @@ end
 						end)
 					end
 				end)
-
 				AddConnection(Color.InputEnded, function(input)
 					if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
 						if ColorInput then
@@ -3341,24 +3141,19 @@ end
 						end
 					end
 				end)
-
 				AddConnection(Hue.InputBegan, function(input)
 					if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
 						if HueInput then
 							HueInput:Disconnect()
 						end;
-
 						HueInput = AddConnection(RunService.RenderStepped, function()
 							local HueY = (math.clamp(Mouse.Y - Hue.AbsolutePosition.Y, 0, Hue.AbsoluteSize.Y) / Hue.AbsoluteSize.Y)
-
 							HueSelection.Position = UDim2.new(0.5, 0, HueY, 0)
 							ColorH = 1 - HueY
-
 							UpdateColorPicker()
 						end)
 					end
 				end)
-
 				AddConnection(Hue.InputEnded, function(input)
 					if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
 						if HueInput then
@@ -3366,23 +3161,19 @@ end
 						end
 					end
 				end)
-
 				function Colorpicker:Set(Value)
 					Colorpicker.Value = Value
 					ColorpickerBox.BackgroundColor3 = Colorpicker.Value
 					ColorpickerConfig.Callback(Colorpicker.Value)
 				end
-
 				Colorpicker:Set(Colorpicker.Value)
-
-				-- Animation d'intro colorpicker
 				AnimateElementIntro(ColorpickerFrame, "colorpicker")
-
 				if ColorpickerConfig.Flag then				
 					OrionLib.Flags[ColorpickerConfig.Flag] = Colorpicker
 				end
 				return Colorpicker
 			end  
+			
 			return ElementFunction   
 		end	
 
@@ -3390,7 +3181,6 @@ end
 
 		function ElementFunction:AddSection(SectionConfig)
 			SectionConfig.Name = SectionConfig.Name or "Section"
-
 			local SectionFrame = SetChildren(SetProps(MakeElement("TFrame"), {
 				Size = UDim2.new(1, 0, 0, 26),
 				Parent = Container
@@ -3409,12 +3199,10 @@ end
 					MakeElement("List", 0, 6)
 				}),
 			})
-
 			AddConnection(SectionFrame.Holder.UIListLayout:GetPropertyChangedSignal("AbsoluteContentSize"), function()
 				SectionFrame.Size = UDim2.new(1, 0, 0, SectionFrame.Holder.UIListLayout.AbsoluteContentSize.Y + 31)
 				SectionFrame.Holder.Size = UDim2.new(1, 0, 0, SectionFrame.Holder.UIListLayout.AbsoluteContentSize.Y)
 			end)
-
 			local SectionFunction = {}
 			for i, v in next, GetElements(SectionFrame.Holder) do
 				SectionFunction[i] = v 
@@ -3434,7 +3222,7 @@ end
 			Container:FindFirstChild("UIPadding"):Destroy()
 			SetChildren(SetProps(MakeElement("TFrame"), {
 				Size = UDim2.new(1, 0, 1, 0),
-				Parent = ItemParent
+				Parent = Container
 			}), {
 				AddThemeObject(SetProps(MakeElement("Image", "rbxassetid://3610239960"), {
 					Size = UDim2.new(0, 18, 0, 18),
@@ -3464,11 +3252,14 @@ end
 			})
 		end
 		return ElementFunction   
-	end  
+	end  -- ← Ferme TabFunction:MakeTab
 	
 	return TabFunction
-end   
+end  -- ← Ferme OrionLib:MakeWindow
 
+-- ============================================================
+-- CONFIGS HUB (après MakeWindow)
+-- ============================================================
 local Configs_HUB = {
   Cor_Hub = Color3.fromRGB(15, 15, 15),
   Cor_Options = Color3.fromRGB(15, 15, 15),
@@ -3478,8 +3269,6 @@ local Configs_HUB = {
   Corner_Radius = UDim.new(0, 4),
   Text_Font = Enum.Font.FredokaOne
 }
-
-local TweenService = game:GetService("TweenService")
 
 local function Create(instance, parent, props)
   local new = Instance.new(instance, parent)
@@ -3566,7 +3355,7 @@ function OrionLib:MakeNotifi(Configs)
     BackgroundColor3 = Configs_HUB.Cor_Hub,
     Position = UDim2.new(0, Menu_Notifi.Size.X.Offset, 0, 0),
     AutomaticSize = "Y"
-  })Corner(Frame2)
+  }) Corner(Frame2)
   
   local TextLabel = Create("TextLabel", Frame2, {
     Size = UDim2.new(1, 0, 0, 25),
@@ -3610,7 +3399,7 @@ function OrionLib:MakeNotifi(Configs)
     BackgroundColor3 = Configs_HUB.Cor_Stroke,
     Position = UDim2.new(0, 2, 0, 30),
     BorderSizePixel = 0
-  })Corner(FrameSize)Create("Frame", Frame2, {
+  }) Corner(FrameSize) Create("Frame", Frame2, {
     Size = UDim2.new(0, 0, 0, 5),
     Position = UDim2.new(0, 0, 1, 5),
     BackgroundTransparency = 1
@@ -3628,7 +3417,7 @@ function OrionLib:MakeNotifi(Configs)
   
   task.spawn(function()
     CreateTween(Frame2, "Position", UDim2.new(0, -20, 0, 0), 0.5, true)
-    CreateTween(Frame2, "Position", UDim2.new(), 0.1, true)task.wait(timewait)
+    CreateTween(Frame2, "Position", UDim2.new(), 0.1, true) task.wait(timewait)
     if Frame2 then
       CreateTween(Frame2, "Position", UDim2.new(0, -20, 0, 0), 0.1, true)
       CreateTween(Frame2, "Position", UDim2.new(0, Menu_Notifi.Size.X.Offset, 0, 0), 0.5, true)
@@ -3638,13 +3427,11 @@ function OrionLib:MakeNotifi(Configs)
 end
 
 function OrionLib:Destroy()
-	-- Désactiver tous les toggles
 	for _, Flag in pairs(OrionLib.Flags) do
 		if Flag.Type == "Toggle" and Flag.Value == true then
 			pcall(function() Flag:Set(false) end)
 		end
 	end
-	-- Déconnecter toutes les connections
 	for _, Connection in next, OrionLib.Connections do
 		pcall(function() Connection:Disconnect() end)
 	end
@@ -3653,11 +3440,4 @@ function OrionLib:Destroy()
 	Orion:Destroy()
 end
 
--- ... tout le code de la lib ...
-
-        return ElementFunction   
-    end                  -- ← ferme TabFunction:MakeTab
-    
--- ... Configs_HUB, MakeNotifi, Destroy ...
-
-return OrionLib          -- ← obligatoire à la finzd
+return OrionLib
