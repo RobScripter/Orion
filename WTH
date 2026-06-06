@@ -3653,4 +3653,11 @@ function OrionLib:Destroy()
 	Orion:Destroy()
 end
 
-return OrionLib
+-- ... tout le code de la lib ...
+
+        return ElementFunction   
+    end                  -- ← ferme TabFunction:MakeTab
+    
+-- ... Configs_HUB, MakeNotifi, Destroy ...
+
+return OrionLib          -- ← obligatoire à la finzd
