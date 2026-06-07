@@ -2336,13 +2336,19 @@ function OrionLib:MakeWindow(WindowConfig)
 				ButtonConfig.Name = ButtonConfig.Name or "Button"
 				ButtonConfig.Callback = ButtonConfig.Callback or function() end
 				ButtonConfig.Icon = ButtonConfig.Icon or "rbxassetid://3944703587"
+
 				local Button = {}
+				local _btnHovering = false
+				local _glitchCharsBtn = {"#","@","!","$","%","&","?","*","/","=","-","+","~","^","<",">","|","\\",":","[","]"}
+
 				local Click = SetProps(MakeElement("Button"), {
 					Size = UDim2.new(1, 0, 1, 0)
 				})
+
 				local ButtonFrame = AddThemeObject(SetChildren(SetProps(MakeElement("RoundFrame", Color3.fromRGB(255, 255, 255), 0, 5), {
 					Size = UDim2.new(1, 0, 0, 33),
-					Parent = ItemParent
+					Parent = ItemParent,
+					ClipsDescendants = true
 				}), {
 					AddThemeObject(SetProps(MakeElement("Label", ButtonConfig.Name, 15), {
 						Size = UDim2.new(1, -12, 1, 0),
@@ -2357,27 +2363,234 @@ function OrionLib:MakeWindow(WindowConfig)
 					AddThemeObject(MakeElement("Stroke"), "Stroke"),
 					Click
 				}), "Second")
+
+				-- ── HOVER : shimmer + underline animé ────────────────────────────
 				AddConnection(Click.MouseEnter, function()
-					TweenService:Create(ButtonFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = Color3.fromRGB(OrionLib.Themes[OrionLib.SelectedTheme].Second.R * 255 + 3, OrionLib.Themes[OrionLib.SelectedTheme].Second.G * 255 + 3, OrionLib.Themes[OrionLib.SelectedTheme].Second.B * 255 + 3)}):Play()
+					_btnHovering = true
+					local theme = OrionLib.Themes[OrionLib.SelectedTheme].Second
+					TweenService:Create(ButtonFrame, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+						BackgroundColor3 = Color3.fromRGB(
+							math.min(theme.R * 255 + 7, 255),
+							math.min(theme.G * 255 + 7, 255),
+							math.min(theme.B * 255 + 7, 255)
+						)
+					}):Play()
+
+					-- Shimmer sweep gauche → droite
+					task.spawn(function()
+						local shimmer = Instance.new("Frame")
+						shimmer.Size = UDim2.new(0.3, 0, 1, 0)
+						shimmer.Position = UDim2.new(-0.3, 0, 0, 0)
+						shimmer.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+						shimmer.BackgroundTransparency = 0.82
+						shimmer.BorderSizePixel = 0
+						shimmer.ZIndex = ButtonFrame.ZIndex + 3
+						shimmer.Parent = ButtonFrame
+						Instance.new("UICorner", shimmer).CornerRadius = UDim.new(0, 4)
+						TweenService:Create(shimmer, TweenInfo.new(0.45, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+							Position = UDim2.new(1.3, 0, 0, 0),
+							BackgroundTransparency = 0.97
+						}):Play()
+						task.wait(0.5)
+						shimmer:Destroy()
+					end)
+
+					-- Underline bleu qui s'étend, disparaît au MouseLeave
+					task.spawn(function()
+						local underline = Instance.new("Frame")
+						underline.Size = UDim2.new(0, 0, 0, 1)
+						underline.Position = UDim2.new(0.5, 0, 1, -1)
+						underline.AnchorPoint = Vector2.new(0.5, 0)
+						underline.BackgroundColor3 = Color3.fromRGB(100, 150, 255)
+						underline.BackgroundTransparency = 0.2
+						underline.BorderSizePixel = 0
+						underline.ZIndex = ButtonFrame.ZIndex + 2
+						underline.Parent = ButtonFrame
+						TweenService:Create(underline, TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+							Size = UDim2.new(0.75, 0, 0, 1)
+						}):Play()
+						while _btnHovering and underline and underline.Parent do
+							task.wait(0.05)
+						end
+						TweenService:Create(underline, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+							Size = UDim2.new(0, 0, 0, 1),
+							BackgroundTransparency = 1
+						}):Play()
+						task.wait(0.25)
+						underline:Destroy()
+					end)
 				end)
+
 				AddConnection(Click.MouseLeave, function()
-					TweenService:Create(ButtonFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = OrionLib.Themes[OrionLib.SelectedTheme].Second}):Play()
+					_btnHovering = false
+					TweenService:Create(ButtonFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+						BackgroundColor3 = OrionLib.Themes[OrionLib.SelectedTheme].Second
+					}):Play()
 				end)
+
+				-- ── PRESS : compression + glitch texte ───────────────────────────
+				AddConnection(Click.MouseButton1Down, function()
+					local theme = OrionLib.Themes[OrionLib.SelectedTheme].Second
+					TweenService:Create(ButtonFrame, TweenInfo.new(0.1, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+						BackgroundColor3 = Color3.fromRGB(
+							math.min(theme.R * 255 + 12, 255),
+							math.min(theme.G * 255 + 12, 255),
+							math.min(theme.B * 255 + 12, 255)
+						),
+						Size = UDim2.new(1, 0, 0, 29)
+					}):Play()
+
+					-- Glitch texte
+					task.spawn(function()
+						local origText = ButtonFrame.Content.Text
+						for _ = 1, 4 do
+							local g = ""
+							for c = 1, #origText do
+								g = g .. (math.random() < 0.35
+									and _glitchCharsBtn[math.random(1, #_glitchCharsBtn)]
+									or string.sub(origText, c, c))
+							end
+							ButtonFrame.Content.Text = g
+							task.wait(0.03)
+						end
+						ButtonFrame.Content.Text = origText
+					end)
+
+					-- Barre de pression sur le bas
+					task.spawn(function()
+						local pressBar = Instance.new("Frame")
+						pressBar.Size = UDim2.new(0, 0, 0, 2)
+						pressBar.Position = UDim2.new(0.5, 0, 1, -2)
+						pressBar.AnchorPoint = Vector2.new(0.5, 0)
+						pressBar.BackgroundColor3 = Color3.fromRGB(100, 160, 255)
+						pressBar.BackgroundTransparency = 0.2
+						pressBar.BorderSizePixel = 0
+						pressBar.ZIndex = ButtonFrame.ZIndex + 4
+						pressBar.Parent = ButtonFrame
+						TweenService:Create(pressBar, TweenInfo.new(0.12, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+							Size = UDim2.new(1, 0, 0, 2)
+						}):Play()
+						task.wait(0.35)
+						TweenService:Create(pressBar, TweenInfo.new(0.2), {BackgroundTransparency = 1}):Play()
+						task.wait(0.25)
+						pressBar:Destroy()
+					end)
+				end)
+
+				-- ── RELEASE : ripple + particules + flash + restore ───────────────
 				AddConnection(Click.MouseButton1Up, function()
-					TweenService:Create(ButtonFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = Color3.fromRGB(OrionLib.Themes[OrionLib.SelectedTheme].Second.R * 255 + 3, OrionLib.Themes[OrionLib.SelectedTheme].Second.G * 255 + 3, OrionLib.Themes[OrionLib.SelectedTheme].Second.B * 255 + 3)}):Play()
+					-- Restore taille avec rebond
+					TweenService:Create(ButtonFrame, TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+						Size = UDim2.new(1, 0, 0, 33)
+					}):Play()
+					local theme = OrionLib.Themes[OrionLib.SelectedTheme].Second
+					TweenService:Create(ButtonFrame, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+						BackgroundColor3 = Color3.fromRGB(
+							math.min(theme.R * 255 + 7, 255),
+							math.min(theme.G * 255 + 7, 255),
+							math.min(theme.B * 255 + 7, 255)
+						)
+					}):Play()
+
+					-- Ripple depuis la souris
+					task.spawn(function()
+						local mX = math.clamp(Mouse.X - ButtonFrame.AbsolutePosition.X, 0, ButtonFrame.AbsoluteSize.X)
+						local mY = math.clamp(Mouse.Y - ButtonFrame.AbsolutePosition.Y, 0, ButtonFrame.AbsoluteSize.Y)
+						local ripple = Instance.new("Frame")
+						ripple.Size = UDim2.new(0, 0, 0, 0)
+						ripple.Position = UDim2.new(0, mX, 0, mY)
+						ripple.AnchorPoint = Vector2.new(0.5, 0.5)
+						ripple.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+						ripple.BackgroundTransparency = 0.72
+						ripple.BorderSizePixel = 0
+						ripple.ZIndex = ButtonFrame.ZIndex + 4
+						ripple.Parent = ButtonFrame
+						Instance.new("UICorner", ripple).CornerRadius = UDim.new(1, 0)
+						TweenService:Create(ripple, TweenInfo.new(0.55, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+							Size = UDim2.new(0, 220, 0, 220),
+							BackgroundTransparency = 1
+						}):Play()
+						task.wait(0.6)
+						ripple:Destroy()
+					end)
+
+					-- Flash blanc global
+					task.spawn(function()
+						local flash = Instance.new("Frame")
+						flash.Size = UDim2.new(1, 0, 1, 0)
+						flash.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+						flash.BackgroundTransparency = 0.87
+						flash.BorderSizePixel = 0
+						flash.ZIndex = ButtonFrame.ZIndex + 3
+						flash.Parent = ButtonFrame
+						TweenService:Create(flash, TweenInfo.new(0.35, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+							BackgroundTransparency = 1
+						}):Play()
+						task.wait(0.4)
+						flash:Destroy()
+					end)
+
+					-- Particules burst
+					task.spawn(function()
+						local mX = math.clamp(Mouse.X - ButtonFrame.AbsolutePosition.X, 8, ButtonFrame.AbsoluteSize.X - 8)
+						local mY = math.clamp(Mouse.Y - ButtonFrame.AbsolutePosition.Y, 4, ButtonFrame.AbsoluteSize.Y - 4)
+						for p = 1, 6 do
+							task.spawn(function()
+								local angle = (p / 6) * math.pi * 2
+								local radius = math.random(16, 28)
+								local dot = Instance.new("Frame")
+								dot.Size = UDim2.new(0, 5, 0, 5)
+								dot.Position = UDim2.new(0, mX, 0, mY)
+								dot.AnchorPoint = Vector2.new(0.5, 0.5)
+								dot.BackgroundColor3 = p % 2 == 0
+									and Color3.fromRGB(100, 160, 255)
+									or Color3.fromRGB(220, 235, 255)
+								dot.BackgroundTransparency = 0.05
+								dot.BorderSizePixel = 0
+								dot.ZIndex = ButtonFrame.ZIndex + 5
+								dot.Parent = ButtonFrame
+								Instance.new("UICorner", dot).CornerRadius = UDim.new(1, 0)
+								TweenService:Create(dot, TweenInfo.new(0.45, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+									Position = UDim2.new(0, mX + math.cos(angle) * radius, 0, mY + math.sin(angle) * radius),
+									BackgroundTransparency = 1,
+									Size = UDim2.new(0, 2, 0, 2)
+								}):Play()
+								task.wait(0.5)
+								dot:Destroy()
+							end)
+						end
+					end)
+
+					-- Flash UIStroke
+					task.spawn(function()
+						local stroke = ButtonFrame:FindFirstChildWhichIsA("UIStroke")
+						if stroke then
+							local origColor = stroke.Color
+							local origTransp = stroke.Transparency
+							TweenService:Create(stroke, TweenInfo.new(0.08, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+								Color = Color3.fromRGB(160, 210, 255),
+								Transparency = 0
+							}):Play()
+							task.wait(0.12)
+							TweenService:Create(stroke, TweenInfo.new(0.35, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+								Color = origColor,
+								Transparency = origTransp
+							}):Play()
+						end
+					end)
+
 					spawn(function()
 						ButtonConfig.Callback()
 					end)
 				end)
-				AddConnection(Click.MouseButton1Down, function()
-					TweenService:Create(ButtonFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = Color3.fromRGB(OrionLib.Themes[OrionLib.SelectedTheme].Second.R * 255 + 6, OrionLib.Themes[OrionLib.SelectedTheme].Second.G * 255 + 6, OrionLib.Themes[OrionLib.SelectedTheme].Second.B * 255 + 6)}):Play()
-				end)
+
 				AnimateElementIntro(ButtonFrame, "button")
+
 				function Button:Set(ButtonText)
 					ButtonFrame.Content.Text = ButtonText
-				end	
+				end
 				return Button
-			end    
+			end
 			
 			function ElementFunction:AddToggle(ToggleConfig)
 				ToggleConfig = ToggleConfig or {}
@@ -3177,19 +3390,30 @@ function OrionLib:MakeWindow(WindowConfig)
 			return ElementFunction   
 		end	
 
+		-- ================================================================
+-- REMPLACEMENT COMPLET DU BLOC  local ElementFunction = {}  +  AddSection
+-- ================================================================
+
 		local ElementFunction = {}
 
 		function ElementFunction:AddSection(SectionConfig)
 			SectionConfig.Name = SectionConfig.Name or "Section"
+
+			local _glitchChars = {"#","@","!","$","%","&","?","*","/","=","-","+","~","^","<",">","|","\\",":","[","]"}
+
+			-- Title avec TextTransparency = 1 pour l'anim d'entrée
+			local TitleLabel = AddThemeObject(SetProps(MakeElement("Label", SectionConfig.Name, 14), {
+				Size = UDim2.new(1, -12, 0, 16),
+				Position = UDim2.new(0, 8, 0, 3),   -- décalé de 8px pour l'accent bar
+				Font = Enum.Font.FredokaOne,
+				TextTransparency = 1
+			}), "TextDark")
+
 			local SectionFrame = SetChildren(SetProps(MakeElement("TFrame"), {
 				Size = UDim2.new(1, 0, 0, 26),
 				Parent = Container
 			}), {
-				AddThemeObject(SetProps(MakeElement("Label", SectionConfig.Name, 14), {
-					Size = UDim2.new(1, -12, 0, 16),
-					Position = UDim2.new(0, 0, 0, 3),
-					Font = Enum.Font.FredokaOne
-				}), "TextDark"),
+				TitleLabel,
 				SetChildren(SetProps(MakeElement("TFrame"), {
 					AnchorPoint = Vector2.new(0, 0),
 					Size = UDim2.new(1, 0, 1, -24),
@@ -3199,10 +3423,163 @@ function OrionLib:MakeWindow(WindowConfig)
 					MakeElement("List", 0, 6)
 				}),
 			})
+
+			-- ── DÉCO : barre verticale accent gauche ─────────────────────────
+			local AccentBar = Instance.new("Frame")
+			AccentBar.Size = UDim2.new(0, 2, 0, 0)
+			AccentBar.Position = UDim2.new(0, 0, 0, 4)
+			AccentBar.BackgroundColor3 = Color3.fromRGB(90, 140, 255)
+			AccentBar.BackgroundTransparency = 0.3
+			AccentBar.BorderSizePixel = 0
+			AccentBar.ZIndex = SectionFrame.ZIndex + 1
+			AccentBar.Parent = SectionFrame
+			Instance.new("UICorner", AccentBar).CornerRadius = UDim.new(1, 0)
+
+			-- ── DÉCO : ligne séparatrice sous le titre ───────────────────────
+			local SepLine = Instance.new("Frame")
+			SepLine.Size = UDim2.new(0, 0, 0, 1)
+			SepLine.Position = UDim2.new(0, 6, 0, 21)
+			SepLine.BackgroundColor3 = Color3.fromRGB(55, 55, 72)
+			SepLine.BackgroundTransparency = 0.3
+			SepLine.BorderSizePixel = 0
+			SepLine.ZIndex = SectionFrame.ZIndex + 1
+			SepLine.Parent = SectionFrame
+			Instance.new("UICorner", SepLine).CornerRadius = UDim.new(1, 0)
+
+			-- ── DOT décoratif en bout de separator ──────────────────────────
+			local SepDot = Instance.new("Frame")
+			SepDot.Size = UDim2.new(0, 4, 0, 4)
+			SepDot.AnchorPoint = Vector2.new(0.5, 0.5)
+			SepDot.Position = UDim2.new(0, 6, 0, 21)   -- repositionné après anim
+			SepDot.BackgroundColor3 = Color3.fromRGB(100, 155, 255)
+			SepDot.BackgroundTransparency = 1
+			SepDot.BorderSizePixel = 0
+			SepDot.ZIndex = SectionFrame.ZIndex + 2
+			SepDot.Parent = SectionFrame
+			Instance.new("UICorner", SepDot).CornerRadius = UDim.new(1, 0)
+
+			-- ── INTRO : attend la fin du LoadSequence si nécessaire ──────────
+			task.spawn(function()
+				while _isLoading do task.wait(0.08) end
+				task.wait(0.06)
+
+				-- 1. Accent bar grandit verticalement
+				TweenService:Create(AccentBar, TweenInfo.new(0.28, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+					Size = UDim2.new(0, 2, 0, 14)
+				}):Play()
+				task.wait(0.1)
+
+				-- 2. Titre : fade-in + glitch reveal typewriter
+				TweenService:Create(TitleLabel, TweenInfo.new(0.12, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+					TextTransparency = 0
+				}):Play()
+				task.spawn(function()
+					local origText = SectionConfig.Name
+					for i = 1, #origText do
+						for _ = 1, 2 do
+							local partial = string.sub(origText, 1, i - 1)
+							partial = partial .. _glitchChars[math.random(1, #_glitchChars)]
+							TitleLabel.Text = partial
+							task.wait(0.016)
+						end
+						TitleLabel.Text = string.sub(origText, 1, i)
+						task.wait(0.02)
+					end
+					-- passe glitch finale
+					for _ = 1, 4 do
+						local g = ""
+						for c = 1, #origText do
+							g = g .. (math.random() < 0.28
+								and _glitchChars[math.random(1, #_glitchChars)]
+								or string.sub(origText, c, c))
+						end
+						TitleLabel.Text = g
+						task.wait(0.028)
+					end
+					TitleLabel.Text = origText
+				end)
+
+				-- 3. Separator se dessine de gauche à droite
+				task.wait(0.13)
+				TweenService:Create(SepLine, TweenInfo.new(0.38, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+					Size = UDim2.new(0.55, 0, 0, 1)
+				}):Play()
+
+				task.wait(0.36)
+
+				-- 4. Dot apparaît au bout du separator
+				SepDot.Position = UDim2.new(0.55, 4, 0, 21)
+				TweenService:Create(SepDot, TweenInfo.new(0.2, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+					BackgroundTransparency = 0.3
+				}):Play()
+				task.wait(0.25)
+				-- separator s'estompe légèrement
+				TweenService:Create(SepLine, TweenInfo.new(0.45, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+					BackgroundTransparency = 0.62
+				}):Play()
+				TweenService:Create(SepDot, TweenInfo.new(0.45, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+					BackgroundTransparency = 0.55
+				}):Play()
+
+				-- 5. Flash lumineux sur la barre accent
+				TweenService:Create(AccentBar, TweenInfo.new(0.1, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+					BackgroundTransparency = 0,
+					BackgroundColor3 = Color3.fromRGB(180, 210, 255)
+				}):Play()
+				task.wait(0.18)
+				TweenService:Create(AccentBar, TweenInfo.new(0.55, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+					BackgroundTransparency = 0.35,
+					BackgroundColor3 = Color3.fromRGB(90, 140, 255)
+				}):Play()
+
+				-- 6. Sweep horizontal au-dessus du titre
+				task.spawn(function()
+					local sweep = Instance.new("Frame")
+					sweep.Size = UDim2.new(0, 4, 0, 14)
+					sweep.Position = UDim2.new(0, 4, 0, 3)
+					sweep.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+					sweep.BackgroundTransparency = 0.75
+					sweep.BorderSizePixel = 0
+					sweep.ZIndex = SectionFrame.ZIndex + 3
+					sweep.Parent = SectionFrame
+					TweenService:Create(sweep, TweenInfo.new(0.35, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+						Position = UDim2.new(0.85, 0, 0, 3),
+						BackgroundTransparency = 1,
+						Size = UDim2.new(0, 2, 0, 14)
+					}):Play()
+					task.wait(0.4)
+					sweep:Destroy()
+				end)
+			end)
+
+			-- ── BREATHING : accent bar pulse en continu ──────────────────────
+			task.spawn(function()
+				task.wait(1.2)
+				while SectionFrame and SectionFrame.Parent do
+					TweenService:Create(AccentBar, TweenInfo.new(1.1, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {
+						BackgroundTransparency = 0.05,
+						BackgroundColor3 = Color3.fromRGB(130, 185, 255)
+					}):Play()
+					TweenService:Create(SepDot, TweenInfo.new(1.1, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {
+						BackgroundTransparency = 0.3
+					}):Play()
+					task.wait(1.1)
+					TweenService:Create(AccentBar, TweenInfo.new(1.1, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {
+						BackgroundTransparency = 0.45,
+						BackgroundColor3 = Color3.fromRGB(75, 120, 240)
+					}):Play()
+					TweenService:Create(SepDot, TweenInfo.new(1.1, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {
+						BackgroundTransparency = 0.65
+					}):Play()
+					task.wait(1.1)
+				end
+			end)
+
 			AddConnection(SectionFrame.Holder.UIListLayout:GetPropertyChangedSignal("AbsoluteContentSize"), function()
 				SectionFrame.Size = UDim2.new(1, 0, 0, SectionFrame.Holder.UIListLayout.AbsoluteContentSize.Y + 31)
 				SectionFrame.Holder.Size = UDim2.new(1, 0, 0, SectionFrame.Holder.UIListLayout.AbsoluteContentSize.Y)
 			end)
+
 			local SectionFunction = {}
 			for i, v in next, GetElements(SectionFrame.Holder) do
 				SectionFunction[i] = v 
