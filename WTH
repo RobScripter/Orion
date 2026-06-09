@@ -525,22 +525,7 @@ function OrionLib:MakeWindow(WindowConfig)
 					end
 				end)
 			end
-			task.spawn(function()
-				local sweep = Instance.new("Frame")
-				sweep.Size = UDim2.new(0, 3, 1, 0)
-				sweep.Position = UDim2.new(0, 0, 0, 0)
-				sweep.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-				sweep.BackgroundTransparency = 0.7
-				sweep.BorderSizePixel = 0
-				sweep.ZIndex = frame.ZIndex + 5
-				sweep.Parent = frame
-				TweenService:Create(sweep, TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
-					Position = UDim2.new(1, 0, 0, 0),
-					BackgroundTransparency = 1
-				}):Play()
-				task.wait(0.35)
-				sweep:Destroy()
-			end)
+			-- sweep désactivé
 			-- Grille / underline désactivée
 			task.wait(0.35)
 			frame.ClipsDescendants = origClips
@@ -1092,38 +1077,8 @@ function OrionLib:MakeWindow(WindowConfig)
 		OverlayStroke.Transparency = 0.5
 		OverlayStroke.Parent = LoadOverlay
 
-		task.spawn(function()
-			for row = 1, 10 do
-				if not LoadOverlay or not LoadOverlay.Parent then break end
-				local gridLine = Instance.new("Frame")
-				gridLine.Size = UDim2.new(0, 0, 0, 1)
-				gridLine.Position = UDim2.new(0, 0, row / 11, 0)
-				gridLine.BackgroundColor3 = Color3.fromRGB(18, 18, 26)
-				gridLine.BackgroundTransparency = 0.4
-				gridLine.BorderSizePixel = 0
-				gridLine.ZIndex = 1000
-				gridLine.Parent = LoadOverlay
-				TweenService:Create(gridLine, TweenInfo.new(0.8, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
-					Size = UDim2.new(1, 0, 0, 1)
-				}):Play()
-				task.wait(0.03)
-			end
-			for col = 1, 14 do
-				if not LoadOverlay or not LoadOverlay.Parent then break end
-				local gridLine = Instance.new("Frame")
-				gridLine.Size = UDim2.new(0, 1, 0, 0)
-				gridLine.Position = UDim2.new(col / 15, 0, 0, 0)
-				gridLine.BackgroundColor3 = Color3.fromRGB(18, 18, 26)
-				gridLine.BackgroundTransparency = 0.4
-				gridLine.BorderSizePixel = 0
-				gridLine.ZIndex = 1000
-				gridLine.Parent = LoadOverlay
-				TweenService:Create(gridLine, TweenInfo.new(0.6, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
-					Size = UDim2.new(0, 1, 1, 0)
-				}):Play()
-				task.wait(0.02)
-			end
-		end)
+		    -- Grille LoadSequence désactivée
+		
 
 		local scanlines = {}
 		local scanData = {
@@ -3798,6 +3753,7 @@ function OrionLib:Destroy()
 	OrionLib.Flags = {}
 	Orion:Destroy()
 end
+
 
 return OrionLib
 
