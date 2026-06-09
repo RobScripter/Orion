@@ -2153,21 +2153,6 @@ AddConnection(TabFrame.MouseButton1Click, function()
     TweenService:Create(TabFrame.Title, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {TextTransparency = 0}):Play()
     TabFrame.Title.Font = Enum.Font.FredokaOne
     Container.Visible = true
-
-    -- ANIMATIONS DÉSACTIVÉES (plus de grille)
-    -- On affiche directement le contenu sans effet
-    for _, Child in next, Container:GetChildren() do
-        if Child:IsA("Frame") or Child:IsA("TextButton") then
-            Child.BackgroundTransparency = 0.7
-            for _, desc in next, Child:GetDescendants() do
-                if desc:IsA("TextLabel") then
-                    desc.TextTransparency = 0
-                elseif desc:IsA("ImageLabel") or desc:IsA("ImageButton") then
-                    desc.ImageTransparency = 0
-                end
-            end
-        end
-    end
 end)
 
 		local function GetElements(ItemParent)
