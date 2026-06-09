@@ -537,42 +537,67 @@ function OrionLib:MakeWindow(WindowConfig)
 		local origSize = tabFrame.Size
 		tabFrame.Size = UDim2.new(origSize.X.Scale, origSize.X.Offset, 0, 0)
 		tabFrame.ClipsDescendants = true
-		tabFrame.Title.TextTransparency = 1
-		tabFrame.Ico.ImageTransparency = 1
+		
+		-- Attendre que les enfants soient disponibles
+		local TitleLabel = tabFrame:FindFirstChild("Title")
+		local IconImage = tabFrame:FindFirstChild("Ico")
+		
+		if TitleLabel then
+			TitleLabel.TextTransparency = 1
+		end
+		if IconImage then
+			IconImage.ImageTransparency = 1
+		end
+		
 		task.spawn(function()
 			task.wait(delay)
 			TweenService:Create(tabFrame, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
 				Size = origSize
 			}):Play()
 			task.wait(0.06)
-			TweenService:Create(tabFrame.Ico, TweenInfo.new(0.15, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
-				ImageTransparency = isFirst and 0 or 0.4,
-				Size = UDim2.new(0, 22, 0, 22)
-			}):Play()
+			
+			if IconImage then
+				TweenService:Create(IconImage, TweenInfo.new(0.15, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+					ImageTransparency = isFirst and 0 or 0.4,
+					Size = UDim2.new(0, 22, 0, 22)
+				}):Play()
+			end
+			
 			task.wait(0.15)
-			TweenService:Create(tabFrame.Ico, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
-				Size = UDim2.new(0, 18, 0, 18)
-			}):Play()
-			local finalText = tabFrame.Title.Text
+			
+			if IconImage then
+				TweenService:Create(IconImage, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+					Size = UDim2.new(0, 18, 0, 18)
+				}):Play()
+			end
+			
+			local finalText = TitleLabel and TitleLabel.Text or ""
 			local targetTransp = isFirst and 0 or 0.4
-			TweenService:Create(tabFrame.Title, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
-				TextTransparency = targetTransp
-			}):Play()
+			
+			if TitleLabel then
+				TweenService:Create(TitleLabel, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+					TextTransparency = targetTransp
+				}):Play()
+			end
+			
 			task.spawn(function()
-				for _ = 1, 3 do
-					local g = ""
-					for c = 1, #finalText do
-						if math.random() < 0.4 then
-							g = g .. _glitchCharsAnim[math.random(1, #_glitchCharsAnim)]
-						else
-							g = g .. string.sub(finalText, c, c)
+				if TitleLabel then
+					for _ = 1, 3 do
+						local g = ""
+						for c = 1, #finalText do
+							if math.random() < 0.4 then
+								g = g .. _glitchCharsAnim[math.random(1, #_glitchCharsAnim)]
+							else
+								g = g .. string.sub(finalText, c, c)
+							end
 						end
+						TitleLabel.Text = g
+						task.wait(0.03)
 					end
-					tabFrame.Title.Text = g
-					task.wait(0.03)
+					TitleLabel.Text = finalText
 				end
-				tabFrame.Title.Text = finalText
 			end)
+			
 			task.spawn(function()
 				local highlight = Instance.new("Frame")
 				highlight.Size = UDim2.new(1, 0, 1, 0)
@@ -588,6 +613,7 @@ function OrionLib:MakeWindow(WindowConfig)
 				task.wait(0.35)
 				highlight:Destroy()
 			end)
+			
 			task.spawn(function()
 				local accent = Instance.new("Frame")
 				accent.Size = UDim2.new(0, 2, 0, 0)
@@ -607,6 +633,7 @@ function OrionLib:MakeWindow(WindowConfig)
 				task.wait(0.35)
 				accent:Destroy()
 			end)
+			
 			task.wait(0.3)
 			tabFrame.ClipsDescendants = false
 		end)
@@ -623,7 +650,6 @@ function OrionLib:MakeWindow(WindowConfig)
 				Size = savedSize,
 				Rotation = 0
 			}):Play()
-			-- CORRECTION: Suppression du glow qui cause le petit crochet
 		end)
 	end
 
@@ -992,7 +1018,6 @@ function OrionLib:MakeWindow(WindowConfig)
 	end)
 
 	local Tabs = {}
-
 	local Window = {}
 
 	function Window:MakeTab(TabConfig)
@@ -1009,7 +1034,6 @@ function OrionLib:MakeWindow(WindowConfig)
 		
 		local TabIndex = #Tabs + 1
 		
-		-- CORRECTION: Fix pour éviter la grille en réappuyant sur un tab
 		local TabFrame = SetChildren(SetProps(MakeElement("Button"), {
 			Size = UDim2.new(1, 0, 0, 40),
 			BackgroundTransparency = 1,
@@ -1696,6 +1720,5 @@ function OrionLib:MakeWindow(WindowConfig)
 	
 	return Window
 end
-
 
 return OrionLib
