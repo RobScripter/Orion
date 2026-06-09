@@ -2136,76 +2136,39 @@ function OrionLib:MakeWindow(WindowConfig)
 			Container.Visible = true
 		end    
 
-		AddConnection(TabFrame.MouseButton1Click, function()
-			for _, Tab in next, TabHolder:GetChildren() do
-				if Tab:IsA("TextButton") then
-					Tab.Title.Font = Enum.Font.FredokaOne
-					TweenService:Create(Tab.Ico, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {ImageTransparency = 0.4}):Play()
-					TweenService:Create(Tab.Title, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {TextTransparency = 0.4}):Play()
-				end    
-			end
-			for _, ItemContainer in next, MainWindow:GetChildren() do
-				if ItemContainer.Name == "ItemContainer" then
-					ItemContainer.Visible = false
-				end    
-			end  
-			TweenService:Create(TabFrame.Ico, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {ImageTransparency = 0}):Play()
-			TweenService:Create(TabFrame.Title, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {TextTransparency = 0}):Play()
-			TabFrame.Title.Font = Enum.Font.FredokaOne
-			Container.Visible = true
+AddConnection(TabFrame.MouseButton1Click, function()
+    for _, Tab in next, TabHolder:GetChildren() do
+        if Tab:IsA("TextButton") then
+            Tab.Title.Font = Enum.Font.FredokaOne
+            TweenService:Create(Tab.Ico, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {ImageTransparency = 0.4}):Play()
+            TweenService:Create(Tab.Title, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {TextTransparency = 0.4}):Play()
+        end    
+    end
+    for _, ItemContainer in next, MainWindow:GetChildren() do
+        if ItemContainer.Name == "ItemContainer" then
+            ItemContainer.Visible = false
+        end    
+    end  
+    TweenService:Create(TabFrame.Ico, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {ImageTransparency = 0}):Play()
+    TweenService:Create(TabFrame.Title, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {TextTransparency = 0}):Play()
+    TabFrame.Title.Font = Enum.Font.FredokaOne
+    Container.Visible = true
 
-			task.spawn(function()
-				local Items = {}
-				for _, Child in next, Container:GetChildren() do
-					if Child:IsA("Frame") or Child:IsA("TextButton") then
-						table.insert(Items, Child)
-					end
-				end
-				for _, Item in next, Items do
-					Item.Position = UDim2.new(0, 25, Item.Position.Y.Scale, Item.Position.Y.Offset)
-					Item.BackgroundTransparency = 1
-					for _, desc in next, Item:GetDescendants() do
-						if desc:IsA("TextLabel") then
-							desc.TextTransparency = 1
-						elseif desc:IsA("ImageLabel") or desc:IsA("ImageButton") then
-							desc.ImageTransparency = 1
-						end
-					end
-				end
-				for _, Item in next, Items do
-					task.wait(0.045)
-					TweenService:Create(Item, TweenInfo.new(0.35, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
-						Position = UDim2.new(0, 0, Item.Position.Y.Scale, Item.Position.Y.Offset),
-						BackgroundTransparency = 0.7
-					}):Play()
-					for _, desc in next, Item:GetDescendants() do
-						if desc:IsA("TextLabel") then
-							TweenService:Create(desc, TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
-								TextTransparency = desc.Name == "Content" and 0 or (desc.Name == "Value" and 0.8 or 0)
-							}):Play()
-						elseif desc:IsA("ImageLabel") or desc:IsA("ImageButton") then
-							TweenService:Create(desc, TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
-								ImageTransparency = 0
-							}):Play()
-						end
-					end
-					local sliderDrag = Item:FindFirstChild("Frame")
-					if sliderDrag then
-						local innerDrag = sliderDrag:FindFirstChildWhichIsA("Frame")
-						if innerDrag and innerDrag.Name ~= "UICorner" then
-							local savedSize = innerDrag.Size
-							innerDrag.Size = UDim2.new(0, 0, 1, 0)
-							task.spawn(function()
-								task.wait(0.2)
-								TweenService:Create(innerDrag, TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
-									Size = savedSize
-								}):Play()
-							end)
-						end
-					end
-				end
-			end)
-		end)
+    -- ANIMATIONS DÉSACTIVÉES (plus de grille)
+    -- On affiche directement le contenu sans effet
+    for _, Child in next, Container:GetChildren() do
+        if Child:IsA("Frame") or Child:IsA("TextButton") then
+            Child.BackgroundTransparency = 0.7
+            for _, desc in next, Child:GetDescendants() do
+                if desc:IsA("TextLabel") then
+                    desc.TextTransparency = 0
+                elseif desc:IsA("ImageLabel") or desc:IsA("ImageButton") then
+                    desc.ImageTransparency = 0
+                end
+            end
+        end
+    end
+end)
 
 		local function GetElements(ItemParent)
 			local ElementFunction = {}
@@ -3754,6 +3717,6 @@ function OrionLib:Destroy()
 	Orion:Destroy()
 end
 
-print("By RobScr")
+print("work")
 return OrionLib
 
